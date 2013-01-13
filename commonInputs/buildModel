@@ -1,0 +1,28 @@
+#!/bin/sh
+
+if [ $# -ne 1 ] ; then
+    echo "Usage: buildModel modelName"
+    exit 1
+fi
+
+modelName=$1
+
+# remove the directory created by nrnivmodl
+rm -rf x86_64
+
+# remove all symbolic links to mod files in this directory
+find . -type l -exec rm -f {} \;
+
+# link the appropriate mod files for the Khaliq-Raman model
+if [ "$modelName" = "KR" -o "$modelName" = "KhaliqRaman" ] ; then
+    ln -s ../KhaliqRaman/*.mod .
+elif [ "$modelName" = "DSB94" ] ; then
+    ln -s ../DSB94/DSB94template .
+    ln -s ../DSB94/*.mod .
+else
+    echo "Unknown model ["$modelName"]."
+    exit 1
+fi
+
+# compile the mod files
+nrnivmodl > /dev/null

@@ -1,0 +1,95 @@
+#!/bin/bash
+
+#################################PARAMETERS##################################
+MODELEXECFOLDER="/user/antwerpen/201/vsc20107/NeuronLibrary/Traub2003"
+TEMPLATECFG=$MODELEXECFOLDER"/model.cfg"
+TEMPLATEPBS=$MODELEXECFOLDER"/PBStemplate"
+
+CURRENTFOLDER=`pwd`
+
+QUEUE="qreg"
+NAME="FixedNCells"
+WALLTIME="24:00:00"
+DIRECTORY0=`pwd`
+#DIRECTORY1=$MODELEXECFOLDER
+NCPU="36 60 96 144 192 240 288 336 384"
+
+NCELLS=13824
+NCELLSPERCPU=10
+MODELDATAFOLDER=$DIRECTORY0"/data"
+DATAFILENAME="data.h5"
+
+###################################FUNCTIONS#################################
+
+function makeConfigAndPBS()
+{
+	# Replace parameters in the config file
+	#echo "sed s|NCELLS|$NCELLS|g ; s|FOLDERNAME|$MODELDATAFOLDER|g ; s|FILENAME|$DATAFILENAME|g $TEMPLATECFG > $DIRECTORY0/$1"
+	sed "s|NCELLS|$NCELLS|g ; s|FOLDERNAME|$MODELDATAFOLDER|g ; s|FILENAME|$DATAFILENAME|g" $TEMPLATECFG > $DIRECTORY0/$1
+
+	# Replace parameters in the PBS script
+	if (( $NCPUS>1 && $NCELLS>1 ))
+	then
+		QUEUE="qreg"
+		WALLTIME="24:00:00"
+	else
+		QUEUE="qshort"
+		WALLTIME="01:00:00"
+	fi
+	#force a large walltime
+	QUEUE="qlong"
+	WALLTIME="72:00:00"
+	
+	NPPN=12
+	(( NNODES=$NCPUS/$NPPN ))
+	(( TMP=$NNODES*$NPPN ))
+	if [ "$NCPUS" -ne "$TMP" ] 
+	then
+		NNODES=$NCPUS
+		NPPN=1
+	fi
+	sed "s|QUEUE|$QUEUE|g ; s|NAME|$NAME|g ; s|HH:MM:SS|$WALLTIME|g; s|NCPUS|$NNODES:ppn=$NPPN|g ; s|DIRECTORY0|$DIRECTORY0|g ; s|DIRECTORY1|$MODELEXECFOLDER|g ; s|MODELCFG|$1|g" $TEMPLATEPBS > $DIRECTORY0/$2
+}
+
+function submitSimulation {
+	cd $DIRECTORY0
+	echo "--> Submiting "$DIRECTORY0"/$MODELPBS"
+	qsub $DIRECTORY0"/"$MODELPBS
+	cd $DIRECTORY0
+}
+###################################MAIN#####################################
+count=0
+if [[ $1 = '--fixed-cells' ]]
+then
+	echo "Submitting jobs for $NCPU number of cpus and $NCELLS cells."
+	for NCPUS in `echo $NCPU`
+	do
+		# JOB A IS FIXED NUMBER OF CELLS WHILE SCALING THE CPUS
+		NAME="A"$NCELLS"neurons"$NCPUS"cpus"
+		MODELCFG=$NAME"model.cfg"
+		MODELPBS=$NAME"PBS.sh"
+		DATAFILENAME=$NAME".h5"
+		makeConfigAndPBS $MODELCFG $MODELPBS
+		submitSimulation 
+		count=$[count+1]
+	done
+elif [[ $1 = '--fixed-cpu' ]]
+then
+	echo "Submitting jobs for $NCPU number of cpus and $NCPU cells."
+	for NCPUS in `echo $NCPU`
+	do
+		# JOB B IS FIXED NUMBER OF CELLS PER CPU
+		((NCELLS=$NCPUS*$NCELLSPERCPU))
+		NAME="B"$NCELLS"neurons"$NCPUS"cpus"
+		MODELCFG=$NAME"model.cfg"
+		MODELPBS=$NAME"PBS.sh"
+		DATAFILENAME=$NAME".h5"
+		makeConfigAndPBS $MODELCFG $MODELPBS
+		submitSimulation 
+		count=$[count+1]
+	done
+	echo Submitted $count jobs.
+else
+	echo "Use --fixed-cpu or --fixed-cells."
+fi
+

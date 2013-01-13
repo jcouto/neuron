@@ -1,0 +1,26 @@
+load_file("nrngui.hoc")
+load_file("rsg_det.ses") // that contains the description of the resurgent sodium channel.
+
+// create soma
+create soma
+access soma
+
+//insert the mechanisms
+insert naRsg_det // from the .ses file 
+insert kpkj
+insert kpkj2
+insert kpkjslow
+insert bkpkj
+insert cadiff
+insert cap
+insert lkpkj
+insert hpkj
+
+
+soma {
+	L = 20
+	diam = 20*13 //area is 13 times bigger than original Khaliq-Raman paper
+	ena = 60
+	ek = -88
+}
+

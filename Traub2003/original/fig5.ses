@@ -1,0 +1,15 @@
+objectvar save_window_, rvp_
+objectvar scene_vector_[3]
+objectvar ocbox_, ocbox_list_, scene_, scene_list_
+{ocbox_list_ = new List()  scene_list_ = new List()}
+{
+save_window_ = new Graph(0)
+save_window_.size(150,1200,-80,30)
+scene_vector_[2] = save_window_
+{save_window_.view(0, -80, 1200, 110, 227, 127, 592.32, 323.2)}
+graphList[0].append(save_window_)
+save_window_.save_name("graphList[0].")
+save_window_.addexpr("pyr3_.comp[1].v(0.5)", 1, 1, 0.770827, 0.968317, 2)
+}
+objectvar scene_vector_[1]
+{doNotify()}
