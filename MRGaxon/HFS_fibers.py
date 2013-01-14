@@ -86,14 +86,16 @@ def simulatePopulation(par,recpar,rec,XYZ=None, fixed_seed=True,verbose=False):
         XYZ = randomPositions(scale,N=100,minimum=635,maximum=3000,fixed_seed=fixed_seed)
     fiber=[]
     for ii in range(0,XYZ.shape[0]):
+        if verbose:
+            print('Running fiber '+str(XYZ[ii,:]))
         par['HFSx']=XYZ[ii,0]
         par['HFSy']=XYZ[ii,1]
         par['HFSz']=XYZ[ii,2]
         updateMRGaxon(par,False)
         runMRGaxon()
         if recpar['record']:
-            gname=str(par['HFSfrequency'])+'Hz'
-            append_fiber_to_file(rec,par,recpar,group=gname)
+            #gname=str(par['HFSfrequency'])+'Hz'
+            append_fiber_to_file(rec,par,recpar)
         resetRecorder(rec,False)
 
 def main():
@@ -115,8 +117,8 @@ def main():
     par, recpar = readConfigurations(filename)
     createMRGaxon(par,verbose)
     rec = recordMRGaxon(recpar,verbose)
-    simulatePopulation(par,recpar,rec,None,True,False):
-	h.quit()
+    simulatePopulation(par,recpar,rec,None,True,True)
+    h.quit()
 if __name__=='__main__':
     main()
     
