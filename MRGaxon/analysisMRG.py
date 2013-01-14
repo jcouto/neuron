@@ -29,9 +29,11 @@ class MRGfile():
         if not filename is None:
             self.append(filename)
 
-    def append(self,filename):
+    def append(self,filename,verbose=False):
         ''' Appends a file and the fibers in that file to the class.
         '''
+        if verbose:
+            print('Reading data from file ' + filename+'.')
         self._file_ref.append(h5.File(filename))
         self.counter+=1
         for v,k in self._file_ref[-1].iteritems():

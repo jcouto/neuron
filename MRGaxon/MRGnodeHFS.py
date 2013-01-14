@@ -227,16 +227,29 @@ def process_configuration(cp, cfg, metadata, section):
                 output[option] = cfg.getboolean(section,option)    
     return output
 
-def append_fiber_to_file(rec,par,recpar,group=None):
+def append_fiber_to_file(rec,par,recpar,group=None,verbose=False):
     '''
     Uses h5py to append a fiber to a file.
     '''
+    if verbose:
+        print('Recording to file '+recpar['filename'])
     fid = h5.File(recpar['filename'],'a')
     n_fiber = len(fid.keys())
     if group is None:
         gid = fid.create_group('fiber'+str(n_fiber))
     else:
         gid = fid.create_group(group)
+    for k,v in par.iteritems():
+        gid.attrs[k]=v
+    for k,v in recpar.iteritems():
+        gid.attrs[k]=v
+    tmp=gid.create_group('spiketimes')
+    for k,v in rec['spiketimes'].iteritems():
+        ds = tmp.create_dataset(k,data=v,compression='gzip')
+    tmp=gid.create_group('voltage')
+    for k,v in rec['voltage'].iteritems():
+        ds = tmp.create_dataset(k,data=v,compression='gzip')
+    
 
 def runMRGaxon():
     h.resetModel()
