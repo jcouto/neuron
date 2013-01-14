@@ -116,7 +116,7 @@ def main():
     createMRGaxon(par,verbose)
     rec = recordMRGaxon(recpar,verbose)
     simulatePopulation(par,recpar,rec,None,True,False):
-
+	h.quit()
 if __name__=='__main__':
     main()
     

@@ -362,6 +362,8 @@ def main():
             saveDictToH5Attrs(group, passpar, verbose)
             saveDictToH5Attrs(group, {'pattern':vecpar['pattern']})
             fid.close()
+    h.quit()
+
 
 if __name__ == "__main__":
     main()
