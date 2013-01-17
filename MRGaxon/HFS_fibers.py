@@ -3,6 +3,7 @@ from MRGnodeHFS import *
 import getopt
 import os.path as path
 import numpy as np
+from neuron import h
 
 __all__=['randomPositions','simulatePopulation','calculateInterNodeLength']
 
@@ -119,5 +120,6 @@ def main():
     rec = recordMRGaxon(recpar,verbose)
     simulatePopulation(par,recpar,rec,None,True,True)
     h.quit()
+
 if __name__=='__main__':
     main()

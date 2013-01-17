@@ -1,15 +1,15 @@
 #!/bin/bash
   # choose queue: qshort (1h), qreg (24h), qlong (72h), qxlong (168h)
-#PBS -q qlong
+#PBS -q qreg
 
 #PBS -N NAME
 
-#PBS -l walltime=72:00:00
+#PBS -l walltime=24:00:00
 
 #PBS -l nodes=1
 
-#PBS -W x=nmatchpolicy:exactnode
-#PBS -l naccesspolicy=singlejob
+# #PBS -W x=nmatchpolicy:exactnode
+# #PBS -l naccesspolicy=singlejob
 # #PBS -l advres=tier1-test.11124
 
 #PBS -m e
@@ -29,8 +29,6 @@ module load NEURON
 module load HDF5
 
 echo `date` " - Started job - " hostname
-#mpirun -r ssh -genv I_MPI_FABRICS shm:ofa,tcp -genv I_MPI_DAPL_PROVIDER ofa-v2-mlx4_0-1 -genv I_MPI_FALLBACK 1 -n ${n_proc}  nrniv -mpi -python pyr3Traub.py -c $JOBDIR/MODELCFG
 nrniv -python HFS_fibers.py $JOBDIR/MODELCFG
 echo `date` " - end Job"
-
 

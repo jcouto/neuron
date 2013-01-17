@@ -287,5 +287,7 @@ def main():
         import pylab as plt
         fig = plotMRGaxon(plt, rec, recpar)
         plt.show()
+    h.quit()
+
 if __name__ == '__main__':
     main()
