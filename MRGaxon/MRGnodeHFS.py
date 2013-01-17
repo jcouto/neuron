@@ -4,7 +4,6 @@ import os.path as path
 import numpy as np
 import h5py as h5
 
-
 __all__ = ['insert_nrn_recorders','pass_parameters_to_nrn','createMRGaxon',
            'recordMRGaxon','fix_patternLag_vector','record_node_voltage',
            'record_node_spikes', 'plotMRGaxon', 'readConfigurations',
@@ -37,7 +36,9 @@ g_par = {
 g_recpar = {
     'record': True,
     'nodes':np.array(range(0,g_par['axonnodes'])),
-    'filename': 'data/simulation.h5'
+    'filename': 'data/simulation.h5',
+    'recordVoltage':True
+    'downsampleFactor':30
     }
 
 def insert_nrn_recorders(segment, labels, rec=None):
@@ -143,7 +144,8 @@ def recordMRGaxon(recpar,verbose):
     '''
     k = recpar['nodes']
     rec = {}
-    rec['voltage'] = record_node_voltage(k)
+    if recpar['recordVoltage']:
+        rec['voltage'] = record_node_voltage(k)
     rec['spiketimes'],rec['apcount'] = record_node_spikes(k)
     if verbose:
         print('Now recording from '+str(k))
@@ -166,31 +168,19 @@ def resetRecorder(rec,verbose=False):
             print('Setting apcount ' + k + ' to zero.' )
         o.n = 0
     
-
-def plotRastergram(plt,spiketrains,offset,color=[0.1,0.1,0.1]):
-    '''
-    Plots a rastergram of the spike trains
-    Spiketrains should be a list of spiketrains
-    '''
-    for i,sp in enumerate(spiketrains):
-        X = np.tile(sp,(2,1))
-        Y = np.transpose(np.tile(np.transpose([i,i+1]),(len(sp),1))+offset)
-        plt.plot(X,Y,color=color,lw=1)
-    
 def plotMRGaxon(plt, rec, recpar,color=[0,0,0]):
     '''
     Plots the voltage traces and a rastergram of the spikes counting ordered by node.
     '''
+    from spk_utils import plotRastergram
     fig = plt.figure(figsize=(10,5))
     ax = []
     ax.append(fig.add_axes([0.1,0.1,0.8,0.2]))
     spiketimes = []
     n_sptrain = len(spiketimes)
-    
     for offset,ii in enumerate(recpar['nodes']):
         spiketimes.append(rec['spiketimes']['spk'+str(ii)].to_python())
     plotRastergram(ax[-1], spiketimes, 0, color)
-
     ax.append(fig.add_axes([0.1,0.4,0.8,0.6]))
     voltages = rec['voltage']
     time = voltages['t']
@@ -243,13 +233,14 @@ def append_fiber_to_file(rec,par,recpar,group=None,verbose=False):
         gid.attrs[k]=v
     for k,v in recpar.iteritems():
         gid.attrs[k]=v
-    tmp=gid.create_group('spiketimes')
-    for k,v in rec['spiketimes'].iteritems():
-        ds = tmp.create_dataset(k,data=v,compression='gzip')
-    tmp=gid.create_group('voltage')
-    for k,v in rec['voltage'].iteritems():
-        ds = tmp.create_dataset(k,data=v,compression='gzip')
-    
+    if 'spiketimes' in rec.keys():
+        tmp=gid.create_group('spiketimes')
+        for k,v in rec['spiketimes'].iteritems():
+            ds = tmp.create_dataset(k,data=v,compression='gzip')
+    if 'voltage' in rec.keys():
+        tmp=gid.create_group('voltage')
+        for k,v in rec['voltage'].iteritems():
+            ds = tmp.create_dataset(k,data=v[0:-1:recpar['downsampleFactor']],compression='gzip')
 
 def runMRGaxon():
     h.resetModel()
