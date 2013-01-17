@@ -37,7 +37,7 @@ g_recpar = {
     'record': True,
     'nodes':np.array(range(0,g_par['axonnodes'])),
     'filename': 'data/simulation.h5',
-    'recordVoltage':True
+    'recordVoltage':True,
     'downsampleFactor':30
     }
 
@@ -240,7 +240,8 @@ def append_fiber_to_file(rec,par,recpar,group=None,verbose=False):
     if 'voltage' in rec.keys():
         tmp=gid.create_group('voltage')
         for k,v in rec['voltage'].iteritems():
-            ds = tmp.create_dataset(k,data=v[0:-1:recpar['downsampleFactor']],compression='gzip')
+            vv = np.array(v)
+            ds = tmp.create_dataset(k,data=vv[0:-1:int(recpar['downsampleFactor'])],compression='gzip')
 
 def runMRGaxon():
     h.resetModel()
