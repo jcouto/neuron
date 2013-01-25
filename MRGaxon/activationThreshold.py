@@ -4,6 +4,8 @@ import getopt
 import os.path as path
 import numpy as np
 
+__all__=['calculateStimStep','searchForThreshold']
+
 def calculateStimStep(A,Apast,stimStep, resolution = 0.9e-3, verbose = False):
     '''
     "A" and "Apast" are the current trial and the previous trial results, respectively.

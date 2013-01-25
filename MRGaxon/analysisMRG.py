@@ -3,7 +3,7 @@ import os.path as path
 import numpy as np
 import h5py as h5
 
-__all__ = ['MRGfile','nonzero_len','fix_axes']
+__all__ = ['MRGfile','zero_len','nonzero_len','fix_axes']
 
 class MRGfile():
     def __init__(self, filename=None,verbose=False):
@@ -24,6 +24,7 @@ class MRGfile():
         self.HFSz = []
         self.fiberD = []
         self.axonnodes = []
+        self.recordedNodes = []
         self.output = []
         self.counter = -1
         if not filename is None:
@@ -45,14 +46,46 @@ class MRGfile():
             self.HFSz.append(k.attrs['HFSz'])
             self.fiberD.append(k.attrs['fiberD'])
             self.axonnodes.append(k.attrs['axonnodes'])
-            self.names = k
+            self.names.append(k)
             self.file.append(self.counter)
             output_name = 'spk'+str(np.max(k.attrs['nodes']))
             if len(k['spiketimes/'+output_name]):
                 self.output.append(np.array(k['spiketimes'+'/'+output_name].value))
             else:
                 self.output.append(np.array([]))
-                
+    
+    def spiketrains(self,index=None):
+        '''Returns the output spiketimes for the specified indexes
+        '''
+        tmp = []
+        for idx in index:
+            tmp.append(self.output[idx])
+        return tmp
+    def voltage(self,index=None, node=None):
+        '''Returns the voltage recorded at a specific node for the given indexes.
+        '''
+        tmp = []
+        for idx in index:
+            if node is None:
+                # Use the output node.
+                output_name = 'v_node'+str(np.max(self.names[idx].attrs['nodes']))
+            else:
+                output_name = 'v_node'+str(node)
+            v = self.names[idx]['voltage/'+output_name][()]
+            tmp.append(v)
+        return np.array(tmp).T
+
+    def time(self,fiber = [0]):
+        '''Returns the time vector at a given fiber.
+        If fiber is not specified, it returns it for fiber 1.
+        '''
+        tmp = []
+        for idx in fiber:
+            output_name = 't'
+            v = self.names[idx]['voltage/'+output_name][()]
+            tmp.append(v)
+        return np.array(tmp).T
+
     def close(self):
         for fid in self._file_ref:
             fid.close()
@@ -65,6 +98,15 @@ def nonzero_len(A,B=None):
         B=A
     A=np.array(A)
     return A[np.nonzero([len(i) for i in B])[0]]
+
+def zero_len(A,B=None):
+    '''Given that A and B are 2 lists, min_nonzero_len(A,B) returns the subset of A that 
+    '''
+    if B is None:
+        B=A
+    A=np.array(A)
+    print np.nonzero([len(i)==0 for i in B])
+    return A[np.nonzero([len(i)==0 for i in B])[0]]
 
 def fix_axes(ax=None,xlabel='',ylabel='',xloc='bottom',yloc='left',xposition=('outward',10),yposition=('outward',10),lw=1,fontsize=10,xcolor='black',ycolor='black'):
     notxloc='bottom'
