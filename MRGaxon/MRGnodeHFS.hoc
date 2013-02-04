@@ -347,7 +347,7 @@ proc buildModel() {
 proc resetModel() {
     XYZ_loc()
     stimulus()
-    init()
     initialize()
+    init()
     //print "Reset MRGaxon."
 }
