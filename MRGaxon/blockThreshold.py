@@ -23,17 +23,18 @@ def main():
     par, recpar = readConfigurations(filename)
     createMRGaxon(par,verbose)
     rec = recordMRGaxon(recpar,verbose)
-    for freq in np.arange(3000,45000,2000.):
+    frequencies = np.append(np.array([3e3]),np.arange(4e3,44e3,2.0e3))
+    for freq in frequencies:
         print('Processing frequency : %4.1f'%(freq))
         par['HFSfrequency'] = freq
         par['HFSamp'] = 1.0
-        par['HFSy'] = 0.5*calculateInterNodeLength(par['fiberD'])
+        #par['HFSy'] = 0.5*calculateInterNodeLength(par['fiberD'])
         stimStep = 1.0
         resetRecorder(rec)
         searchForThreshold(par,recpar,rec,k='HFSamp',
                            startpoint=stimStep,
                            resolution=1e-3,
-                           caseExpr='len(spks[(spks>40.) & (spks<50.)])<1',
+                           caseExpr='len(spks[(spks>40.) & (spks<50.)])==0',
                            verbose=verbose_level1)
 if __name__=='__main__':
     main()
