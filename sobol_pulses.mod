@@ -13,8 +13,58 @@ TITLE Current pulses drawn from a quasi-random sequence
 : 2012 Theoretical Neurobiology and Neuroengineering, University of Antwerp.
 : Joao Couto and Daniele Linaro
 
+
 VERBATIM
-#include "sobseq.h"
+
+#define SOBOL_MAXBIT 30
+#define SOBOL_MAXDIM 6
+
+float sobseq(int init)
+{
+  int j,k,l;
+  unsigned long i,im,ipp;
+  static float fac;
+  static unsigned long in = 0,ix = 0, *iu[SOBOL_MAXBIT+1];
+  static unsigned long mdeg[SOBOL_MAXDIM+1] = {0,1,2,3,3,4,4};
+  static unsigned long ip[SOBOL_MAXDIM+1] = {0,0,1,1,2,1,4};
+  static unsigned long iv[SOBOL_MAXDIM*SOBOL_MAXBIT+1] = {0,1,1,1,1,1,1,3,1,3,3,1,1,5,7,7,3,3,5,15,11,5,15,13,9};
+  
+  if (init) {
+    if (iv[1] != 1)
+      return -1.0;
+    fac = 1.0/(1L << SOBOL_MAXBIT);
+    for (j=1,k=0; j<=SOBOL_MAXBIT; j++,k+=SOBOL_MAXDIM)
+      iu[j] = &iv[k];
+    for (k=1; k<=SOBOL_MAXDIM; k++) {
+      for (j=1; j<=mdeg[k]; j++)
+	iu[j][k] <<= (SOBOL_MAXBIT-j);
+      for (j=mdeg[k]+1; j<=SOBOL_MAXBIT; j++) {
+	ipp = ip[k];
+	i = iu[j-mdeg[k]][k];
+	i ^= (i >> mdeg[k]);
+	for (l=mdeg[k]-1; l>=1; l--) {
+	  if (ipp & 1)
+	    i ^= iu[j-l][k];
+	  ipp >>= 1;
+	}
+	iu[j][k] = i;
+      }
+    }
+    return 0;
+  }
+  im = in++;
+  for (j=1; j<=SOBOL_MAXBIT; j++) {
+    if (!(im & 1))
+      break;
+    im >>= 1;
+  } 
+  if (j > SOBOL_MAXBIT)
+    fprintf(stderr, "SOBOL_MAXBIT (%d) too small in sobseq.\n", SOBOL_MAXBIT);
+  im = (j-1)*SOBOL_MAXDIM;
+  ix ^= iv[im+1];
+  return ix*fac;
+}
+
 ENDVERBATIM
 
 UNITS {

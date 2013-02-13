@@ -20,6 +20,9 @@ class Neuron:
     class SynapseProperties (tbl.IsDescription):
         pass
 
+    class PhaseResponseCurveProperties (tbl.IsDescription):
+        pass
+
     def __init__(self, ID, verbose=False):
         """
         Constructs the morphology of the neuron, adds synapses to it and finally adds
@@ -30,12 +33,15 @@ class Neuron:
         self._soma = None
         self._netcons = {}
         self._synapses = []
+        self._prc_netcon = None
+        self._prc_sobol = None
+        self._prc_sobol_times=None
         self._build()
         self._addSynapses()
         self._addSpikeCounter()
         self._neuronPropsClass = self.NeuronProperties
         self._synapsePropsClass = self.SynapseProperties
-
+        self._prcPropsClass = self.PhaseResponseCurveProperties
     @property
     def ID(self):
         """
@@ -95,6 +101,13 @@ class Neuron:
     @property
     def synapsePropertiesClass(self):
         return self._synapsePropsClass
+    @property
+    def phaseResponseCurveProperties(self):
+        return self._prcProps
+
+    @property
+    def phaseResponseCurvePropertiesClass(self):
+        return self._prcPropsClass
 
     def spikeTimes(self):
         """
@@ -220,7 +233,7 @@ class Neuron:
         except:
             pass
 
-    def _addSpikeCounter(self, threshold=0):
+    def _addSpikeCounter(self, threshold=-20):
         """
         Adds a spike counter to the model neuron.
         """
@@ -242,7 +255,41 @@ class Neuron:
         if not synapseIndex in self.connections:
             self.connections[synapseIndex] = []
         self.connections[synapseIndex].append(nc)
+    def addPRCestimator(self, prcProps, threshold=-20):
+        """
+        Connects a PRCestimator to the neuron soma.
+        """
+        self._prc_sobol = h.SobolPulses(0.5,sec=self.soma)
+        self._prc_netcon = h.NetCon(self.soma(0.5)._ref_v,self._prc_sobol,sec=self.soma)
+        self._prc_netcon.delay = 0
+        self._prc_netcon.threshold = threshold
+        self._prc_sobol.gp = prcProps['gp']
+        self._prc_sobol.gi = prcProps['gi']
+        self._prc_sobol.F = prcProps['F']
+        self._prc_sobol.amp = prcProps['amp']
+        self._prc_sobol.pw = prcProps['pw']
+        self._prc_sobol.delay=0
+        self._prc_sobol.spkCount=prcProps['spkCount']
+        self._prc_sobol_times = h.Vector()
+        nc = h.NetCon(self._prc_sobol._ref_iPulse, None,sec=self._soma)
+        nc.delay = 0
+        nc.threshold = self._prc_sobol.amp/2
+        nc.record(self._prc_sobol_times)
+    def _addPRCestimator(self):
+        """
+        Adds a PRC estimator from intrinsic properties.
+        """
+        raise NotImplementedError()
         
+    def perturbationTimes(self):
+        """
+        Returns the times of the perturbation.
+        """
+        if self._prc_sobol_times is None:
+            return np.array([])
+        else:
+            return np.array(self._prc_sobol_times)
+
 class KhaliqRaman(Neuron):
     """
     Single compartment model of a Purkinje cell based on the paper:
@@ -264,9 +311,18 @@ class KhaliqRaman(Neuron):
         tauRise = tbl.Float64Col()
         tauDecay = tbl.Float64Col()
         Erev = tbl.Float64Col()
+    class PhaseResponseCurveProperties (tbl.IsDescription):
+        frequency = tbl.Float64Col()
+        gp = tbl.Float64Col()
+        gi = tbl.Float64Col()
+        pulseAmp = tbl.Float64Col()
+        pulseWidth = tbl.Float64Col()
+        spkCount = tbl.Float64Col()
 
     def __init__(self, ID, neuronProps={'length': 20, 'diameter': 20, 'nSynapses': 100},
-                 synapseProps={'name': 'ampa', 'Erev': 0.}, verbose=False):
+                 synapseProps={'name': 'ampa', 'Erev': 0.},
+                 prcProps={'frequency':None, 'gp':0.01, 'gi':0.1, 'pulseAmp':0.05,'pulseWidth':1,'spkCount':6},
+                 verbose=False):
         """
         Sets the parameters of the neuron and the calls the constructor of the parent class.
         Parameters:
@@ -280,7 +336,7 @@ class KhaliqRaman(Neuron):
         self._neuronProps = neuronProps
         self._neuronProps['name'] = 'KhaliqRaman'
         self._neuronProps['description'] = 'Khaliq-Raman Purkinje neuron model'
-
+        
         self._synapseProps = synapseProps
         if self._synapseProps['name'].lower() == 'ampa':
             self._synapseProps['description'] = 'AMPA synapse'
@@ -291,7 +347,9 @@ class KhaliqRaman(Neuron):
         else:
             del self._synapseProps
             raise Exception('Unknown synaptic model [%s]' % synapseProps['name'])
-
+        
+        self._prcProps = prcProps
+        
         Neuron.__init__(self, ID, verbose)
 
     @property
@@ -355,14 +413,42 @@ class KhaliqRaman(Neuron):
                 return
             self.synapses.append(syn)
         h.pop_section()
+    def setPRCfrequency(self,frequency):
+        """
+        Changes the PRC estimator frequency property.
+        """
+        self._prcProps['frequency']=frequency
+        if not self._prc_sobol is None:
+            self._prc_sobol.F = frequency
+        return
+    def _addPRCestimator(self):
+        """
+        Adds a PRC estimator from intrinsic properties.
+        """
+        prcProps = {}
+        prcProps['F'] = self._prcProps['frequency']
+        prcProps['gp'] = self._prcProps['gp']
+        prcProps['gi'] = self._prcProps['gi']
+        prcProps['amp'] = self._prcProps['pulseAmp']
+        prcProps['pw'] = self._prcProps['pulseWidth']
+        prcProps['spkCount'] = self._prcProps['spkCount']
+        self.addPRCestimator(prcProps,-20)
 
-def saveNeuron(filename, neuron, saveVoltage=False):
-    fid = h5.H5File(filename, 'a', 'Common input simulation')
+
+def saveNeuron(filename, neuron, saveVoltage=False, simulationName = 'Common input simulation'):
+    fid = h5.H5File(filename, 'a', simulationName)
     groupName = '/Neurons/ID_' + str(neuron.ID)
     fid.createGroup('/','Neurons')
     fid.createGroup('/Neurons','ID_' + str(neuron.ID))
     fid.writeTable(groupName, 'Cell', neuron.neuronPropertiesClass, 'Neuron properties', neuron.neuronProperties)
     fid.writeTable(groupName, 'Synapses', neuron.synapsePropertiesClass, 'Synapses properties', neuron.synapseProperties)
+
+    try:
+        fid.writeTable(groupName,'PRC',neuron.phaseResponseCurvePropertiesClass,
+                       'Phase Response Curve Properties',neuron.phaseResponseCurveProperties)
+        fid.writeArray(groupName, 'Perturbations', tbl.Float64Atom(), neuron.PerturbationTimes())
+    except:
+        pass
     fid.writeArray(groupName, 'Spikes', tbl.Float64Atom(), neuron.spikeTimes())
     if saveVoltage:
         try:
@@ -370,5 +456,6 @@ def saveNeuron(filename, neuron, saveVoltage=False):
         except:
             pass
     fid.close()
+
 
     

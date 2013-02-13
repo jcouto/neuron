@@ -1,5 +1,0 @@
-XSym
-0016
-303a1f43aefb7fa89d3f6bf0ee0697a1
-../DSB94/NaF.mod
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               

@@ -1,5 +1,0 @@
-XSym
-0015
-698fe96194c3d20b425fe5a0ca96287f
-../DSB94/K2.mod
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

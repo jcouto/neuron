@@ -1,5 +1,0 @@
-XSym
-0016
-800bc7b6ddbfd4e577f6b175fb77b2e6
-../DSB94/Kh1.mod
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
