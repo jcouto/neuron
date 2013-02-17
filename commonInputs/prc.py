@@ -27,13 +27,14 @@ def usage():
     print('\t -a : amplitude of the perturbation pulse')
     print('\t -w : pulse width of the perturbation pulse')
     print('\t -n : amplitude of the noise (0pA - default [Not implemented!])')
+    print('\t -p : plot (on/off)')
 
 def makeOutputFilename(prefix='', extension='.out'):
     filename = prefix
     if prefix != '' and prefix[-1] != '_':
         filename = filename + '_'
     now = time.localtime(time.time())
-    filename = filename + '%d%02d%02d-%02d%02d%02d' % \
+    filename = filename + '%d%02d%02d%02d%02d%02d' % \
         (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
     if extension[0] != '.':
         extension = '.' + extension
@@ -47,7 +48,7 @@ def makeOutputFilename(prefix='', extension='.out'):
 def main():
     available_models = ['kr']
     try:
-        opts,args = getopt.getopt(sys.argv[1:],'hi:m:g:f:d:s:a:w:n:',['help'])
+        opts,args = getopt.getopt(sys.argv[1:],'hpi:m:g:f:d:s:a:w:n:',['help'])
     except getopt.GetoptError, err:
         print('Could not complete task!')
         print(err)
@@ -64,10 +65,13 @@ def main():
     pulse_width = 1
     noise_amp = 0
     spk_count = 6
+    plot = False
     for o,a in opts:
         if o == '-h':
             usage()
             sys.exit(0)
+        elif o=='-p':
+            plot = True
         elif o == '-m':
             if not a.lower() in available_models:
                 print('Model %s not available.' % a)
@@ -90,8 +94,8 @@ def main():
             pulse_width = float(a)
         elif o == '-n':
             noise_amp = float(a)
-                
-    N = 1500
+    ntrials = 1500
+    N = 1
     if model == 'kr':
         neurons = [KhaliqRaman(gid,
                                {'diameter':cell_size,'length':cell_size,'nSynapses':0},
@@ -99,35 +103,46 @@ def main():
                                          'gp':0.01, 'gi':0.1,
                                          'pulseAmp':pulse_amp,
                                          'pulseWidth':pulse_width,
-                                         'spkCount':spk_count},) for i in range(N)]
+                                         'spkCount':spk_count}) 
+                   for gid in range(N)]
+
     for n in neurons:
         n._addPRCestimator()
 
-    # Uncomment to record voltage
-    #for n in neurons:
-    #    n.addSomaticVoltageRecorder()
-    #time = h.Vector()
-    #time.record(h._ref_t)
-    
+    if plot:
+        iPID = []
+        iPulse = []
+        for n in neurons:
+            n.addSomaticVoltageRecorder()
+            iPID.append(h.Vector())
+            iPulse.append(h.Vector())
+            iPID[-1].record(n._prc_sobol._ref_iPI)
+            iPulse[-1].record(n._prc_sobol._ref_iPulse)
+        time = h.Vector()
+        time.record(h._ref_t)
+
     h.load_file('stdrun.hoc')
     if duration is None:
-        duration = N*spk_count*1./frequency*1000.
+        duration = np.ceil(ntrials*spk_count/frequency*1000.0)
+    print('Going to run for %dms'%duration)
     h.tstop = duration
     h.run()
-    print('Computed prc for frequency %3.0f.'%(f))
-    
+    print('Computed prc for frequency %3.0fHz.'%(frequency))
     for n in neurons:
         saveNeuron(filename, n)
+    
+    if plot:
+        fig = plt.figure()
+        for i,n in enumerate(neurons):
+            fig.add_subplot(len(neurons),1,i)
+            plt.plot(time,n.somaticVoltage(),'k')
+            plt.plot(time,np.array(iPID[i])*1000,'r')
+            plt.plot(time,np.array(iPulse[i])*1000,'b')
+            plt.plot(n.perturbationTimes(),np.ones(np.shape(n.perturbationTimes()))*20.,'|r')
+            plt.plot(n.spikeTimes(),np.ones(np.shape(n.spikeTimes()))*20.,'|b')
+        plt.show()
 
-    # Uncomment to plot
-    #fig = plt.figure()
-    #for i,n in enumerate(neurons):
-    #    fig.add_subplot(len(neurons),1,i)
-    #    plt.plot(time,n.somaticVoltage(),'k')
-    #    plt.plot(n.perturbationTimes(),np.ones(np.shape(n.perturbationTimes()))*20.,'|r')
-    #    plt.plot(n.spikeTimes(),np.ones(np.shape(n.spikeTimes()))*20.,'|b')
-    #plt.show()
-
+    h.quit()
 
 if __name__ == '__main__':
     main()

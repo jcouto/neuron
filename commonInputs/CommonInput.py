@@ -446,9 +446,10 @@ def saveNeuron(filename, neuron, saveVoltage=False, simulationName = 'Common inp
     try:
         fid.writeTable(groupName,'PRC',neuron.phaseResponseCurvePropertiesClass,
                        'Phase Response Curve Properties',neuron.phaseResponseCurveProperties)
-        fid.writeArray(groupName, 'Perturbations', tbl.Float64Atom(), neuron.PerturbationTimes())
+        fid.writeArray(groupName, 'Perturbations', tbl.Float64Atom(), neuron.perturbationTimes())
     except:
         pass
+
     fid.writeArray(groupName, 'Spikes', tbl.Float64Atom(), neuron.spikeTimes())
     if saveVoltage:
         try:
