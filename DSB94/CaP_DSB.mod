@@ -42,7 +42,7 @@ ASSIGNED {
 BREAKPOINT {
         SOLVE states
         gca = gcabar * m*h
-	ica = gca* (v-eca)
+		ica = gca* (v-eca)
 }
  
 UNITSOFF

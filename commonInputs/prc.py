@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from CommonInput import *
+from DSB94 import *
 import numpy as np
 from neuron import h
 import pylab as plt
@@ -46,7 +47,7 @@ def makeOutputFilename(prefix='', extension='.out'):
     return filename + suffix + extension
 
 def main():
-    available_models = ['kr']
+    available_models = ['kr','dsb94']
     try:
         opts,args = getopt.getopt(sys.argv[1:],'hpi:m:g:f:d:s:a:w:n:',['help'])
     except getopt.GetoptError, err:
@@ -105,19 +106,34 @@ def main():
                                          'pulseWidth':pulse_width,
                                          'spkCount':spk_count}) 
                    for gid in range(N)]
+    elif model == 'dsb94':
+        #fixedInput = {'probability': 0.5, 'spikeTimes': np.cumsum(np.random.poisson(30,140))}
+        #for n in neurons:
+        #    n.addFixedInput(fixedInput['probability'], fixedInput['spikeTimes'])
 
+        neurons = [DSB94(gid,
+                               {'nSynapses':0},
+                               prcProps={'frequency':frequency,
+                                         'gp':0.0, 'gi':0.0,
+                                         'pulseAmp':pulse_amp,
+                                         'pulseWidth':pulse_width,
+                                         'spkCount':spk_count}) 
+                   for gid in range(N)]
     for n in neurons:
         n._addPRCestimator()
 
     if plot:
         iPID = []
         iPulse = []
+        estimatedFreq = []
         for n in neurons:
             n.addSomaticVoltageRecorder()
             iPID.append(h.Vector())
             iPulse.append(h.Vector())
+            estimatedFreq.append(h.Vector())
             iPID[-1].record(n._prc_sobol._ref_iPI)
             iPulse[-1].record(n._prc_sobol._ref_iPulse)
+            estimatedFreq[-1].record(n._prc_sobol._ref_estimatedFreq)
         time = h.Vector()
         time.record(h._ref_t)
 
@@ -138,6 +154,7 @@ def main():
             plt.plot(time,n.somaticVoltage(),'k')
             plt.plot(time,np.array(iPID[i])*1000,'r')
             plt.plot(time,np.array(iPulse[i])*1000,'b')
+            plt.plot(time,np.array(estimatedFreq[i]),'g')
             plt.plot(n.perturbationTimes(),np.ones(np.shape(n.perturbationTimes()))*20.,'|r')
             plt.plot(n.spikeTimes(),np.ones(np.shape(n.spikeTimes()))*20.,'|b')
         plt.show()

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+1#!/usr/bin/env python
 from CommonInput import *
 import os
 template = 'DSB94template'
@@ -27,9 +27,19 @@ class DSB94(Neuron):
         tauRise = tbl.Float64Col()
         tauDecay = tbl.Float64Col()
         Erev = tbl.Float64Col()
+        gbar = tbl.Float64Col()
+
+    class PhaseResponseCurveProperties (tbl.IsDescription):
+        frequency = tbl.Float64Col()
+        gp = tbl.Float64Col()
+        gi = tbl.Float64Col()
+        pulseAmp = tbl.Float64Col()
+        pulseWidth = tbl.Float64Col()
+        spkCount = tbl.Float64Col()
 
     def __init__(self, ID,neuronProps={'nSynapses': 1474},
                  synapseProps={'name': 'biexp', 'Erev': 0., 'tauRise':0.5, 'tauDecay':1.2},
+                 prcProps={'frequency':None, 'gp':0.01, 'gi':0.1, 'pulseAmp':0.05,'pulseWidth':1,'spkCount':6},
                  verbose=False):
         """
         Sets the parameters of the neuron and the calls the constructor of the parent class.
@@ -60,7 +70,9 @@ class DSB94(Neuron):
         else:
             del self._synapseProps
             raise Exception('Unknown synaptic model [%s]' % synapseProps['name'])
-            
+        
+        self._prcProps = prcProps 
+        
         Neuron.__init__(self, ID, verbose)
        
 
@@ -180,28 +192,51 @@ class DSB94(Neuron):
         """
         self._setNumberSynapses(nsyn)
         self._addSynapses(location='soma')
-        
+    
+    def setPRCfrequency(self,frequency):
+        """
+        Changes the PRC estimator frequency property.
+        """
+        self._prcProps['frequency']=frequency
+        if not self._prc_sobol is None:
+            self._prc_sobol.F = frequency
+        return
+
+    def _addPRCestimator(self):
+        """
+        Adds a PRC estimator from intrinsic properties.
+        """
+        prcProps = {}
+        prcProps['F'] = self._prcProps['frequency']
+        prcProps['gp'] = self._prcProps['gp']
+        prcProps['gi'] = self._prcProps['gi']
+        prcProps['amp'] = self._prcProps['pulseAmp']
+        prcProps['pw'] = self._prcProps['pulseWidth']
+        prcProps['spkCount'] = self._prcProps['spkCount']
+        self.addPRCestimator(prcProps,-20)
+
+
 def main():
     import pylab as plt
     N = 1
-    nsyn = 2000
+    nsyn = 0
     fixedInput = {'probability': 0.5, 'spikeTimes': np.cumsum(np.random.poisson(30,140))}
-    neurons = [DSB94(i,nsyn) for i in range(1)]
-    for n in neurons:
-        n.addFixedInput(fixedInput['probability'], fixedInput['spikeTimes'])
-        n.addPoissonInputs(clusterSize=5, stimulusProps={'frequency': 0.1, 'noise': 1.})
-        n.addSomaticVoltageRecorder()
+    neurons = [DSB94(i,{'nSynapses':nsyn}) for i in range(1)]
+    #for n in neurons:
+    #    n.addFixedInput(fixedInput['probability'], fixedInput['spikeTimes'])
+    #    n.addPoissonInputs(clusterSize=5, stimulusProps={'frequency': 0.1, 'noise': 1.})
+    #    n.addSomaticVoltageRecorder()
 
     time = h.Vector()
     time.record(h._ref_t)
 
     h.load_file('stdrun.hoc')
-    h.tstop = 1400
+    h.tstop = 100
     h.run()
     filename = 'DSBneuron.h5'
     for n in neurons:
         print('Neuron [%d] emitted %d spikes.' % (n.ID, len(n.spikeTimes())))
-        os.remove(filename)
+        #os.remove(filename)
         saveNeuron(filename, n)
         plt.plot(time,n.somaticVoltage())
     plt.show()
