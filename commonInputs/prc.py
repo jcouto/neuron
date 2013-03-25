@@ -104,8 +104,11 @@ def main():
                                          'gp':0.01, 'gi':0.1,
                                          'pulseAmp':pulse_amp,
                                          'pulseWidth':pulse_width,
-                                         'spkCount':spk_count}) 
+                                         'spkCount':spk_count,
+                                         'delay':1000}) 
                    for gid in range(N)]
+        for n in neurons:
+            n.soma.gkbar_hpkj = n.soma.gkbar_hpkj * 1.40
     elif model == 'dsb94':
         #fixedInput = {'probability': 0.5, 'spikeTimes': np.cumsum(np.random.poisson(30,140))}
         #for n in neurons:
@@ -114,11 +117,18 @@ def main():
         neurons = [DSB94(gid,
                                {'nSynapses':0},
                                prcProps={'frequency':frequency,
-                                         'gp':0.0, 'gi':0.0,
+                                         'gp':0, 'gi':0,
                                          'pulseAmp':pulse_amp,
                                          'pulseWidth':pulse_width,
                                          'spkCount':spk_count}) 
                    for gid in range(N)]
+        baseline = []
+        for n in neurons:
+            baseline.append(h.IClamp(n.soma(0.5)))
+            baseline[-1].amp = 0.0
+            baseline[-1].dur = duration
+            baseline[-1].delay = 10
+ 
     for n in neurons:
         n._addPRCestimator()
 
@@ -143,6 +153,7 @@ def main():
     print('Going to run for %dms'%duration)
     h.tstop = duration
     h.run()
+    print neurons[0].perturbationTimes()
     print('Computed prc for frequency %3.0fHz.'%(frequency))
     for n in neurons:
         saveNeuron(filename, n)

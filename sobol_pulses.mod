@@ -96,7 +96,7 @@ PARAMETER {
     pw          = 0.5   (ms)
     amp         = 0.25  (nA)
     spkCount    = 10    (1)
-    tau         = 0.05  (s)
+    tau         = 0.01  (s)
     gp          = 0     (1)
     gi          = 0     (1)
     maxPIcount  = 3     (1)

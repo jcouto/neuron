@@ -159,10 +159,11 @@ def resetRecorder(rec,verbose=False):
         if verbose:
             print('Reseting ' + k)
         o.clear()
-    for k,o in rec['voltage'].iteritems():
-        if verbose:
-            print('Reseting ' + k)
-        o.clear()
+    if 'voltage' in rec.keys():
+        for k,o in rec['voltage'].iteritems():
+            if verbose:
+                print('Reseting ' + k)
+            o.clear()
     for k,o in rec['apcount'].iteritems():
         if verbose:
             print('Setting apcount ' + k + ' to zero.' )

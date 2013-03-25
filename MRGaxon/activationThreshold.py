@@ -21,7 +21,7 @@ def calculateStimStep(A,Apast,stimStep, resolution = 0.9e-3, verbose = False):
         stimStep = stimStep/2.0
         if verbose:
             print('Last two trials were different.Cutting in half.')
-    if stimStep<resolution and A:
+    if stimStep<=resolution and A:
         if verbose:
             print "Condiction satisfied. Reached last step."
         return np.nan

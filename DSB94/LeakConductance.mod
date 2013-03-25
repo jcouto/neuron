@@ -5,7 +5,7 @@ COMMENT
    **************************************************
 
    This file holds the implementation in NEURON of the Cell Mechanism:
-   Leak (Type: Channel mechanism, Model: Template based ChannelML file)
+   LeakConductance (Type: Channel mechanism, Model: Template based ChannelML file)
 
    with parameters: 
    /channelml/@units = Physiological Units 
@@ -13,16 +13,16 @@ COMMENT
    /channelml/ion/@name = non_specific 
    /channelml/ion/@charge = 1 
    /channelml/ion/@default_erev = -80 
-   /channelml/channel_type/@name = Leak 
+   /channelml/channel_type/@name = LeakConductance 
    /channelml/channel_type/@density = yes 
    /channelml/channel_type/status/@value = stable 
-   /channelml/channel_type/notes = Simple example of a leak/passive conductance. Note: for GENESIS cells with a single leak conductance,         it is better to use the Rm and Em variab ... 
+   /channelml/channel_type/notes = Simple example of a leak/passive conductance. 
    /channelml/channel_type/current_voltage_relation/ohmic/@ion = non_specific 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/@default_gmax = 0.3 
 
-// File from which this was generated: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/Leak/LeakConductance.xml
+// File from which this was generated: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/LeakConductance/LeakConductance.xml
 
-// XSL file with mapping to simulator: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/Leak/ChannelML_v1.8.1_NEURONmod.xsl
+// XSL file with mapping to simulator: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/LeakConductance/ChannelML_v1.8.1_NEURONmod.xsl
 
 ENDCOMMENT
 
@@ -35,11 +35,10 @@ COMMENT
     ChannelML file containing a single Channel description
 ENDCOMMENT
 
-TITLE Channel: Leak
+TITLE Channel: LeakConductance
 
 COMMENT
-    Simple example of a leak/passive conductance. Note: for GENESIS cells with a single leak conductance,
-        it is better to use the Rm and Em variables for a passive current.
+    Simple example of a leak/passive conductance.
 ENDCOMMENT
 
 
@@ -58,7 +57,7 @@ UNITS {
 NEURON {
       
 
-    SUFFIX Leak
+    SUFFIX LeakConductance
     ? A non specific current is present
     RANGE e
     NONSPECIFIC_CURRENT i

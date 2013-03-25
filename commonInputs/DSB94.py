@@ -1,13 +1,13 @@
 1#!/usr/bin/env python
 from CommonInput import *
 import os
-template = 'DSB94template'
+template = 'DSB94tmplt'
 
 if os.path.isfile(template):
     h.load_file(template)
 else:
     print('Could not load template [%s]'%template)
-    h.quit()
+#    h.quit()
 
 class DSB94(Neuron):
     """
@@ -98,9 +98,9 @@ class DSB94(Neuron):
     def _build(self):
         if self.verbose:
             print('>>> Building a De Schutter and Bower (1994) neuron model.')
-        self._cell = h.DSB94()
+        self._cell = h.DSB94(str(self._ID),'DSB94','neuroConstruct version')
         self._soma = self._cell.soma
-        self._dendrite = self._cell.dend
+        self._dendrite = self._cell.dendrite_group
         h.celsius = 37
         self._dendriticSynapseSections = [] 
         self._resetDendriticSynapseSections()        

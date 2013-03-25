@@ -5,21 +5,21 @@ COMMENT
    **************************************************
 
    This file holds the implementation in NEURON of the Cell Mechanism:
-   KA (Type: Channel mechanism, Model: Template based ChannelML file)
+   CaP (Type: Channel mechanism, Model: Template based ChannelML file)
 
    with parameters: 
    /channelml/@units = Physiological Units 
    /channelml/notes = ChannelML file containing a single Channel from De Schutter and Bower 1998 
-   /channelml/ion/@name = k 
-   /channelml/ion/@charge = 1 
-   /channelml/ion/@default_erev = -85 
-   /channelml/channel_type/@name = KA 
+   /channelml/ion/@name = ca 
+   /channelml/ion/@charge = 2 
+   /channelml/ion/@default_erev = 137.52625 
+   /channelml/channel_type/@name = CaP 
    /channelml/channel_type/@density = yes 
    /channelml/channel_type/status/@value = stable 
    /channelml/channel_type/status/comment = Verified equivalence of NEURON and GENESIS mapping to orig NEURON mod impl at 0.02ms dt with current pulse (but 0.002 is better) 
    /channelml/channel_type/status/comment = Verified equivalence of NEURON and GENESIS mapping to orig NEURON mod impl at 0.02ms dt with current pulse (but 0.002 is better) 
    /channelml/channel_type/status/contributor/name = Padraig Gleeson 
-   /channelml/channel_type/notes = A type K current. Based on Roth et al's reimplementation of original GENESIS model in NEURON 
+   /channelml/channel_type/notes = P type Ca current. Based on Roth et al's reimplementation of original GENESIS model in NEURON 
    /channelml/channel_type/authorList/modelAuthor[1]/name = De Schutter, E. 
    /channelml/channel_type/authorList/modelAuthor[2]/name = Bower, J. 
    /channelml/channel_type/authorList/modelTranslator[1]/name = Padraig Gleeson 
@@ -39,13 +39,13 @@ COMMENT
    /channelml/channel_type/authorList/modelTranslator[5]/comment = Conversion of GENESIS model to NEURON 
    /channelml/channel_type/publication/fullTitle = De Schutter, E., and Bower, J. M. (1994). An active membrane model of the cerebellar Purkinje cell. I. Simulation of current clamps in slice. J Neurop ... 
    /channelml/channel_type/publication/pubmedRef = http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=pubmed&amp;cmd=Retrieve&amp;dopt=AbstractPlus&amp;list_uids=7512629 
-   /channelml/channel_type/neuronDBref/modelName = K channels 
-   /channelml/channel_type/neuronDBref/uri = http://senselab.med.yale.edu/senselab/NeuronDB/channelGene2.htm#table3 
-   /channelml/channel_type/current_voltage_relation/ohmic/@ion = k 
-   /channelml/channel_type/current_voltage_relation/ohmic/conductance/@default_gmax = 15 
+   /channelml/channel_type/neuronDBref/modelName = Calcium channels 
+   /channelml/channel_type/neuronDBref/uri = http://senselab.med.yale.edu/senselab/NeuronDB/channelGene2.htm#table1 
+   /channelml/channel_type/current_voltage_relation/ohmic/@ion = ca 
+   /channelml/channel_type/current_voltage_relation/ohmic/conductance/@default_gmax = 4.5 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/rate_adjustments/q10_settings/@q10_factor = 3 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/rate_adjustments/q10_settings/@experimental_temp = 37 
-   /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[1]/@power = 4 
+   /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[1]/@power = 1 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[1]/state/@name = m 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[1]/state/@fraction = 1 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[2]/@power = 1 
@@ -53,42 +53,45 @@ COMMENT
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[2]/state/@fraction = 1 
    /channelml/channel_type/hh_gate[1]/@state = m 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/@type = sigmoid 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/@expr = A/(1 + exp(k*(v-d))) 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[1]/@name = A 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[1]/@value = 1.4 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[1]/@value = 8.5 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[2]/@name = k 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[2]/@value = -0.08333333 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[2]/@value = -0.08 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[3]/@name = d 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[3]/@value = -27 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/alpha/parameterised_hh/parameter[3]/@value = 8 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/@type = sigmoid 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/@expr = A/(1 + exp(k*(v-d))) 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[1]/@name = A 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[1]/@value = 0.49 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[1]/@value = 35 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[2]/@name = k 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[2]/@value = 0.25 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[2]/@value = 0.0689655 
    /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[3]/@name = d 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[3]/@value = -30 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_gate/beta/parameterised_hh/parameter[3]/@value = -74 
    /channelml/channel_type/hh_gate[2]/@state = h 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/@type = sigmoid 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/@expr = A/(1 + exp(k*(v-d))) 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[1]/@name = A 
-   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[1]/@value = 0.0175 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[1]/@value = 0.0015 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[2]/@name = k 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[2]/@value = 0.125 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[3]/@name = d 
-   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[3]/@value = -50 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/alpha/parameterised_hh/parameter[3]/@value = -29 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/@type = sigmoid 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/@expr = A/(1 + exp(k*(v-d))) 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[1]/@name = A 
-   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[1]/@value = 1.3 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[1]/@value = 0.0055 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[2]/@name = k 
-   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[2]/@value = -0.1 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[2]/@value = -0.125 
    /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[3]/@name = d 
-   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[3]/@value = -13 
-   /channelml/channel_type/impl_prefs/comment = Settings from the original mod file 
-   /channelml/channel_type/impl_prefs/table_settings/@max_v = 100 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_gate/beta/parameterised_hh/parameter[3]/@value = -23 
+   /channelml/channel_type/impl_prefs/table_settings/@max_v = 150 
    /channelml/channel_type/impl_prefs/table_settings/@min_v = -100 
-   /channelml/channel_type/impl_prefs/table_settings/@table_divisions = 200 
+   /channelml/channel_type/impl_prefs/table_settings/@table_divisions = 250 
 
-// File from which this was generated: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/KA/KA_Chan.xml
+// File from which this was generated: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/CaP/CaP_Chan.xml
 
-// XSL file with mapping to simulator: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/KA/ChannelML_v1.8.1_NEURONmod.xsl
+// XSL file with mapping to simulator: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/CaP/ChannelML_v1.8.1_NEURONmod.xsl
 
 ENDCOMMENT
 
@@ -101,10 +104,10 @@ COMMENT
     ChannelML file containing a single Channel from De Schutter and Bower 1998
 ENDCOMMENT
 
-TITLE Channel: KA
+TITLE Channel: CaP
 
 COMMENT
-    A type K current. Based on Roth et al's reimplementation of original GENESIS model in NEURON
+    P type Ca current. Based on Roth et al's reimplementation of original GENESIS model in NEURON
 ENDCOMMENT
 
 
@@ -123,8 +126,8 @@ UNITS {
 NEURON {
       
 
-    SUFFIX KA
-    USEION k READ ek WRITE ik VALENCE 1 ? reversal potential of ion is read, outgoing current is written
+    SUFFIX CaP
+    USEION ca READ eca WRITE ica VALENCE 2 ? reversal potential of ion is read, outgoing current is written
             
     RANGE gmax, gion
     
@@ -135,7 +138,7 @@ NEURON {
 PARAMETER { 
       
 
-    gmax = 0.015 (S/cm2) ? default value, should be overwritten when conductance placed on cell
+    gmax = 0.0045 (S/cm2) ? default value, should be overwritten when conductance placed on cell
     
 }
 
@@ -148,10 +151,10 @@ ASSIGNED {
     
     celsius (degC)
     
-    ? Reversal potential of k
-    ek (mV)
-    ? The outward flow of ion: k calculated by rate equations...
-    ik (mA/cm2)
+    ? Reversal potential of ca
+    eca (mV)
+    ? The outward flow of ion: ca calculated by rate equations...
+    ica (mA/cm2)
             
     
     gion (S/cm2)
@@ -167,8 +170,8 @@ BREAKPOINT {
     SOLVE states METHOD cnexp
          
 
-    gion = gmax*((1*m)^4)*((1*h)^1)
-    ik = gion*(v - ek)
+    gion = gmax*((1*m)^1)*((1*h)^1)
+    ica = gion*(v - eca)
                 
 
 }
@@ -176,7 +179,7 @@ BREAKPOINT {
 
 
 INITIAL {
-    ek = -85
+    eca = 137.52625
         
     rates(v)
     m = minf
@@ -205,7 +208,7 @@ PROCEDURE rates(v(mV)) {
         
     TABLE minf, mtau,hinf, htau
  DEPEND celsius
- FROM -100 TO 100 WITH 200
+ FROM -100 TO 150 WITH 250
     
     
     UNITSOFF
@@ -220,18 +223,18 @@ PROCEDURE rates(v(mV)) {
     ?      ***  Adding rate equations for gate: m  ***
         
     ? Found a parameterised form of rate equation for alpha, using expression: A / (1 + exp(k*(v-d)))
-    A_alpha_m = 1.4
-    k_alpha_m = -0.08333333
-    d_alpha_m = -27
+    A_alpha_m = 8.5
+    k_alpha_m = -0.08
+    d_alpha_m = 8
      
     
     alpha = A_alpha_m / (exp((v - d_alpha_m) * k_alpha_m) + 1)
     
     
     ? Found a parameterised form of rate equation for beta, using expression: A / (1 + exp(k*(v-d)))
-    A_beta_m = 0.49
-    k_beta_m = 0.25
-    d_beta_m = -30
+    A_beta_m = 35
+    k_beta_m = 0.0689655
+    d_beta_m = -74
      
     
     beta = A_beta_m / (exp((v - d_beta_m) * k_beta_m) + 1)
@@ -248,18 +251,18 @@ PROCEDURE rates(v(mV)) {
     ?      ***  Adding rate equations for gate: h  ***
         
     ? Found a parameterised form of rate equation for alpha, using expression: A / (1 + exp(k*(v-d)))
-    A_alpha_h = 0.0175
+    A_alpha_h = 0.0015
     k_alpha_h = 0.125
-    d_alpha_h = -50
+    d_alpha_h = -29
      
     
     alpha = A_alpha_h / (exp((v - d_alpha_h) * k_alpha_h) + 1)
     
     
     ? Found a parameterised form of rate equation for beta, using expression: A / (1 + exp(k*(v-d)))
-    A_beta_h = 1.3
-    k_beta_h = -0.1
-    d_beta_h = -13
+    A_beta_h = 0.0055
+    k_beta_h = -0.125
+    d_beta_h = -23
      
     
     beta = A_beta_h / (exp((v - d_beta_h) * k_beta_h) + 1)

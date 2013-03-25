@@ -64,8 +64,7 @@ STATE {
 
 BREAKPOINT {
            SOLVE states METHOD cnexp
-           :ik = gkbar * m * m * m * z * z * h * (v - ek)
-           ik = gkbar * m * m * m * z * z * h * (v - 0)
+           ik = gkbar * m * m * m * z * z * h * (v - ek)
 }
 
 DERIVATIVE states {

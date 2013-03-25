@@ -5,7 +5,7 @@ COMMENT
    **************************************************
 
    This file holds the implementation in NEURON of the Cell Mechanism:
-   K2 (Type: Channel mechanism, Model: ChannelML based process)
+   KC_tabfix (Type: Channel mechanism, Model: ChannelML based process)
 
    with parameters: 
    /channelml/@units = Physiological Units 
@@ -18,14 +18,14 @@ COMMENT
    /channelml/ion[2]/@charge = 2 
    /channelml/ion[2]/@role = ModulatingSubstance 
    /channelml/ion[2]/notes = The channel's conductance of K is dependent on this ion's concentration 
-   /channelml/channel_type/@name = K2 
+   /channelml/channel_type/@name = KC_tabfix 
    /channelml/channel_type/@density = yes 
    /channelml/channel_type/status/@value = in_progress 
    /channelml/channel_type/status/comment = Getting there... 
    /channelml/channel_type/status/contributor/name = Padraig Gleeson 
-   /channelml/channel_type/notes = Ca2+ dependent K current (K2). Based on Roth et al's reimplementation of original GENESIS model in NEURON 
+   /channelml/channel_type/notes = Ca2+ dependent K current. Based on Roth et al's reimplementation of original GENESIS model in NEURON 
    /channelml/channel_type/current_voltage_relation/ohmic/@ion = k 
-   /channelml/channel_type/current_voltage_relation/ohmic/conductance/@default_gmax = .39 
+   /channelml/channel_type/current_voltage_relation/ohmic/conductance/@default_gmax = 80 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[1]/@power = 1 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[1]/state/@name = m 
    /channelml/channel_type/current_voltage_relation/ohmic/conductance/gate[1]/state/@fraction = 1 
@@ -38,21 +38,21 @@ COMMENT
    /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/conc_dependence/@variable_name = ca_conc_m 
    /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/conc_dependence/@min_conc = 0 
    /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/conc_dependence/@max_conc = 0.050 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/alpha/generic_equation_hh/@expr = 25 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/alpha/generic_equation_hh/@expr = 7.5 
    /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/@type = exponential 
    /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[1]/@name = A 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[1]/@value = 0.075 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[1]/@value = 0.11 
    /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[2]/@name = k 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[2]/@value = -0.1666666667 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[2]/@value = -0.06711409 
    /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[3]/@name = d 
-   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[3]/@value = -25 
+   /channelml/channel_type/hh_gate[1]/transition/voltage_conc_gate/beta/parameterised_hh/parameter[3]/@value = 35 
    /channelml/channel_type/hh_gate[2]/@state = z 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/conc_dependence/@name = Calcium 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/conc_dependence/@ion = ca 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/conc_dependence/@variable_name = ca_conc_z 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/conc_dependence/@min_conc = 0 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/conc_dependence/@max_conc = 1e-8 
-   /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/alpha/generic_equation_hh/@expr = 0.2/( (ca_conc_z*1e6) *1000) 
+   /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/alpha/generic_equation_hh/@expr = 4/( ( floor(((ca_conc_z*1e6) - 4e-5)/9.9986667e-5)*9.9986667e-5 + 4e-5) *1000) 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/beta/generic_equation_hh/@expr = 1 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/tau/generic_equation_hh/@expr = 10 
    /channelml/channel_type/hh_gate[2]/transition/voltage_conc_gate/inf/generic_equation_hh/@expr = 1/(1 + alpha) 
@@ -61,9 +61,9 @@ COMMENT
    /channelml/channel_type/impl_prefs/table_settings/@min_v = -100 
    /channelml/channel_type/impl_prefs/table_settings/@table_divisions = 200 
 
-// File from which this was generated: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/K2/K2_Chan.xml
+// File from which this was generated: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/KC_tabfix/Kc_Chan.xml
 
-// XSL file with mapping to simulator: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/K2/ChannelML_v1.8.1_NEURONmod.xsl
+// XSL file with mapping to simulator: /Users/joao/lib/neuron/DSB94-neuroConstruct/neuroConstruct/cellMechanisms/KC_tabfix/ChannelML_v1.8.1_NEURONmod.xsl
 
 ENDCOMMENT
 
@@ -72,10 +72,10 @@ ENDCOMMENT
 
 ?  Unit system of original ChannelML file: Physiological Units
 
-TITLE Channel: K2
+TITLE Channel: KC_tabfix
 
 COMMENT
-    Ca2+ dependent K current (K2). Based on Roth et al's reimplementation of original GENESIS model in NEURON
+    Ca2+ dependent K current. Based on Roth et al's reimplementation of original GENESIS model in NEURON
 ENDCOMMENT
 
 
@@ -94,7 +94,7 @@ UNITS {
 NEURON {
       
 
-    SUFFIX K2
+    SUFFIX KC_tabfix
     USEION k READ ek WRITE ik VALENCE 1 ? reversal potential of ion is read, outgoing current is written
             
     USEION ca READ cai VALENCE 2 ? internal concentration of ion is read
@@ -108,7 +108,7 @@ NEURON {
 PARAMETER { 
       
 
-    gmax = 0.00039 (S/cm2) ? default value, should be overwritten when conductance placed on cell
+    gmax = 0.08 (S/cm2) ? default value, should be overwritten when conductance placed on cell
     
 }
 
@@ -188,21 +188,21 @@ PROCEDURE settables(v(mV), cai(mM)) {
     ?      ***  Adding rate equations for gate: m  ***
              
 
-    ? Found a generic form of the rate equation for alpha, using expression: 25
+    ? Found a generic form of the rate equation for alpha, using expression: 7.5
                     
     ? Equations can depend on concentration. NEURON uses 'SI Units' internally for concentration, 
     ? but ChannelML file is in Physiological Units...
     ca_conc_m = ca_conc_m / 1000000
-    alpha = 25
+    alpha = 7.5
         
     ? Resetting concentration...
     ca_conc_m = ca_conc_m * 1000000
     
     
     ? Found a parameterised form of rate equation for beta, using expression: A*exp(k*(v-d))
-    A_beta_m = 0.075
-    k_beta_m = -0.1666666667
-    d_beta_m = -25
+    A_beta_m = 0.11
+    k_beta_m = -0.06711409
+    d_beta_m = 35
      
     
     beta = A_beta_m * exp((v - d_beta_m) * k_beta_m)
@@ -222,12 +222,12 @@ PROCEDURE settables(v(mV), cai(mM)) {
     ?      ***  Adding rate equations for gate: z  ***
              
 
-    ? Found a generic form of the rate equation for alpha, using expression: 0.2/( (ca_conc_z*1e6) *1000)
+    ? Found a generic form of the rate equation for alpha, using expression: 4/( ( floor(((ca_conc_z*1e6) - 4e-5)/9.9986667e-5)*9.9986667e-5 + 4e-5) *1000)
                     
     ? Equations can depend on concentration. NEURON uses 'SI Units' internally for concentration, 
     ? but ChannelML file is in Physiological Units...
     ca_conc_z = ca_conc_z / 1000000
-    alpha = 0.2/( (ca_conc_z*1e6) *1000)
+    alpha = 4/( ( floor(((ca_conc_z*1e6) - 4e-5)/9.9986667e-5)*9.9986667e-5 + 4e-5) *1000)
         
     ? Resetting concentration...
     ca_conc_z = ca_conc_z * 1000000

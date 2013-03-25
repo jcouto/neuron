@@ -318,6 +318,7 @@ class KhaliqRaman(Neuron):
         pulseAmp = tbl.Float64Col()
         pulseWidth = tbl.Float64Col()
         spkCount = tbl.Float64Col()
+        delay = tbl.Float64Col()
 
     def __init__(self, ID, neuronProps={'length': 20, 'diameter': 20, 'nSynapses': 100},
                  synapseProps={'name': 'ampa', 'Erev': 0.},
@@ -446,11 +447,15 @@ def saveNeuron(filename, neuron, saveVoltage=False, simulationName = 'Common inp
     try:
         fid.writeTable(groupName,'PRC',neuron.phaseResponseCurvePropertiesClass,
                        'Phase Response Curve Properties',neuron.phaseResponseCurveProperties)
+    except:
+        print('Could not record PRC properties.')
+    try:
         fid.writeArray(groupName, 'Perturbations', tbl.Float64Atom(), neuron.perturbationTimes())
     except:
-        pass
+        print('Did not record perturbations.')
 
     fid.writeArray(groupName, 'Spikes', tbl.Float64Atom(), neuron.spikeTimes())
+
     if saveVoltage:
         try:
             fid.writeArray(groupName, 'Voltage', tbl.Float64Atom(), neuron.somaticVoltage())
