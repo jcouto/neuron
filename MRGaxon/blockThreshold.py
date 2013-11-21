@@ -9,6 +9,7 @@ from HFS_fibers import *
 def main():
     '''
     Runs a binomial search for block threshold at HFS.
+    To run this use the configuration example in 'template.cfg'
     '''
     print('Binomial search for block threshold.')
     
@@ -27,7 +28,7 @@ def main():
     for freq in frequencies:
         print('Processing frequency : %4.1f'%(freq))
         par['HFSfrequency'] = freq
-        par['HFSamp'] = 1.0
+        par['HFSamp'] = 0.5
         #par['HFSy'] = 0.5*calculateInterNodeLength(par['fiberD'])
         stimStep = 1.0
         resetRecorder(rec)
@@ -38,4 +39,4 @@ def main():
                            verbose=verbose_level1)
 if __name__=='__main__':
     main()
-    
+

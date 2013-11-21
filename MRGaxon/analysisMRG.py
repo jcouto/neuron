@@ -2,6 +2,7 @@
 import os.path as path
 import numpy as np
 import h5py as h5
+import pylab as plt
 
 __all__ = ['MRGfile','zero_len','nonzero_len','fix_axes']
 
@@ -108,7 +109,9 @@ def zero_len(A,B=None):
     print np.nonzero([len(i)==0 for i in B])
     return A[np.nonzero([len(i)==0 for i in B])[0]]
 
-def fix_axes(ax=None,xlabel='',ylabel='',xloc='bottom',yloc='left',xposition=('outward',10),yposition=('outward',10),lw=1,fontsize=10,xcolor='black',ycolor='black'):
+def fix_axes(ax=None,xlabel='',ylabel='',xloc='bottom',yloc='left',
+             xposition=('outward',0),yposition=('outward',0),
+             lw=1,fontsize=10,xcolor='black',ycolor='black'):
     notxloc='bottom'
     notyloc='right'
     if xloc=='bottom':
@@ -117,6 +120,7 @@ def fix_axes(ax=None,xlabel='',ylabel='',xloc='bottom',yloc='left',xposition=('o
         notyloc='left'
     if ax==None:
         ax=plt.gca()
+    ax.tick_params(axis='both', direction='out')
     ax.spines[notxloc].set_visible(False)
     ax.spines[notyloc].set_visible(False)
     ax.spines[xloc].set_visible(True)
@@ -133,12 +137,15 @@ def fix_axes(ax=None,xlabel='',ylabel='',xloc='bottom',yloc='left',xposition=('o
     xax.set_label_text(xlabel)
     xax.set_label_position(xloc)
     xax.set_label_position(xloc)
+    
     xax.label.set_color(xcolor)
     yax = ax.yaxis
     yax.set_label_text(ylabel)
     yax.set_label_position(yloc)
     yax.set_label_position(yloc)
     yax.label.set_color(ycolor)
+    for label in [xax.label,yax.label]:
+        label.set_size(fontsize)
     for label in ax.get_xticklabels():
             label.set_color(xcolor)
             label.set_fontsize(fontsize)
@@ -148,8 +155,8 @@ def fix_axes(ax=None,xlabel='',ylabel='',xloc='bottom',yloc='left',xposition=('o
     for label in ax.get_xticklines():
             label.set_color(xcolor)
             label.set_lw(lw)
-            label.set_markersize(6)
+            label.set_markersize(4)
     for label in ax.get_yticklines():
             label.set_color(ycolor)
             label.set_lw(lw)
-            label.set_markersize(6)
+            label.set_markersize(4)

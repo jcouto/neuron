@@ -4,12 +4,14 @@ import os.path as path
 import numpy as np
 import h5py as h5
 
-__all__ = ['insert_nrn_recorders','pass_parameters_to_nrn','createMRGaxon',
-           'recordMRGaxon','fix_patternLag_vector','record_node_voltage',
-           'record_node_spikes', 'plotMRGaxon', 'readConfigurations',
-           'resetRecorder','runMRGaxon','updateMRGaxon','append_fiber_to_file']
+__all__ = ['insert_nrn_recorders','pass_parameters_to_nrn',
+           'createMRGaxon','recordMRGaxon','fix_patternLag_vector',
+           'record_node_voltage','record_node_spikes',
+           'plotMRGaxon', 'readConfigurations','resetRecorder',
+           'runMRGaxon','updateMRGaxon','append_fiber_to_file']
 
-# Define global/default parameters that are used when probing the configuration file
+# Define global/default parameters that are used when
+# probing the configuration file
 g_par = { 
     'dt': 0.002,
     'tstop': 50,
@@ -22,7 +24,7 @@ g_par = {
     'HFSpolarity': 1.0,
     'HFSdelay': 0,
     'HFSpulsewidth':0.09,
-    'HFSamp': 1.0,
+    'HFSamp': 1.154,
     'HFSwaveform': 0,
     'HFSx': 0.0,
     'HFSy': 0.0,
@@ -74,7 +76,7 @@ def pass_parameters_to_nrn(parameters, exception = [], verb=False):
                 if verb:
                     print(k + " = "+str(v))
             else:
-               # exec("h."+ k +".from_python("+str(v)+")")
+                #exec("h."+ k +".from_python("+str(v)+")")
                 getattr(h,k).from_python(v)
                 if verb:
                     print("h."+k+".from_python("+str(v)+")")
@@ -86,11 +88,14 @@ def fix_patternLag_vector(parameters):
     Ideally this should be done in the NEURON script.
     '''
     if 'pattern' in parameters.keys():
-        parameters["patternLag"] = np.array([ii-0.005 for ii in parameters["pattern"]])
+        parameters["patternLag"] = np.array([ii-0.005
+                                             for ii in
+                                             parameters["pattern"]])
     else:
-        print('Key "pattern" not found in this dictionary. Did nothing.')
+        print('Key "pattern" not found in this dict. Did nothing.')
 
-def record_node_spikes(nodenumber, rec=None, apc=None, threshold = -15):
+def record_node_spikes(nodenumber, rec=None,
+                       apc=None, threshold = -15):
     '''
     Records the action potentials of a particular set of nodes.
     Returns a "rec" dictionary.
@@ -171,7 +176,8 @@ def resetRecorder(rec,verbose=False):
     
 def plotMRGaxon(plt, rec, recpar,color=[0,0,0]):
     '''
-    Plots the voltage traces and a rastergram of the spikes counting ordered by node.
+    Plots the voltage traces and a rastergram of the
+    spikes counting ordered by node.
     '''
     from spk_utils import plotRastergram
     fig = plt.figure(figsize=(10,5))
@@ -196,8 +202,10 @@ def process_configuration(cp, cfg, metadata, section):
        - "cfg" is a ConfigParser file object
        - "metadata" a dictionary with default parameters
        - "section" is the section to look for in the cfg file
-    This function looks for the same type of the value in the metadata dict.
-    If it is a float or a list, it will look for a value or evaluate an expression.
+    This function looks for the same type of the value in the
+    metadata dict.
+    If it is a float or a list, it will look for a value or
+    evaluate an expression.
     '''
     output = metadata.copy()
     if not cfg.has_section(section):
@@ -242,7 +250,9 @@ def append_fiber_to_file(rec,par,recpar,group=None,verbose=False):
         tmp=gid.create_group('voltage')
         for k,v in rec['voltage'].iteritems():
             vv = np.array(v)
-            ds = tmp.create_dataset(k,data=vv[0:-1:int(recpar['downsampleFactor'])],compression='gzip')
+            ds = tmp.create_dataset(k,
+                                    data=vv[0:-1:int(recpar['downsampleFactor'])],
+                                    compression='gzip')
 
 def runMRGaxon():
     h.resetModel()
@@ -268,7 +278,8 @@ def readConfigurations(filename):
 
 def main():
     '''
-    Executes a simulation taking the parameters from a configuration file.
+    Executes a simulation taking the parameters from a
+    configuration file.
     '''
     verbose = True
     plot = True

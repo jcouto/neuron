@@ -21,7 +21,7 @@ def calculateStimStep(A,Apast,stimStep, resolution = 0.9e-3, verbose = False):
         stimStep = stimStep/2.0
         if verbose:
             print('Last two trials were different.Cutting in half.')
-    if stimStep<=resolution and A:
+    if stimStep<resolution and A:
         if verbose:
             print "Condiction satisfied. Reached last step."
         return np.nan
@@ -30,7 +30,8 @@ def calculateStimStep(A,Apast,stimStep, resolution = 0.9e-3, verbose = False):
     else:
         return stimStep
 
-def searchForThreshold(par,recpar,rec,k,startpoint,resolution=1e-3, caseExpr='len(spks)>0',verbose=False):
+def searchForThreshold(par,recpar,rec,k,startpoint,resolution=1e-3,
+                       caseExpr='len(spks)>0',verbose=False):
     '''
     Performs the binomial search.
     par and recpar are the simulation parameters, k the key to be replaced, and 
@@ -42,10 +43,12 @@ def searchForThreshold(par,recpar,rec,k,startpoint,resolution=1e-3, caseExpr='le
     stimStep = startpoint
     lastNodeName = 'spk' + str(np.max(recpar['nodes']))
     while not np.isnan(stimAmp):
-        # Runs the simulation and records data.
+        # Runs the simulation and records data when the condition is satisfied.
+        resetRecorder(rec,False)
         par[k] = stimAmp
         if verbose:
-            print('Running '+str(stimAmp)+' on '+k)
+            print('Running '+str(stimAmp) + ' on '+ k +
+                  ' for condition ' + caseExpr)
         updateMRGaxon(par,False)
         runMRGaxon()
         spks = np.array(rec['spiketimes'][lastNodeName])
@@ -54,9 +57,9 @@ def searchForThreshold(par,recpar,rec,k,startpoint,resolution=1e-3, caseExpr='le
                                          resolution,verbose)
         pastCase = case
         stimAmp = stimAmp + stimStep
-        if recpar['record']:
-            append_fiber_to_file(rec,par,recpar)
-        resetRecorder(rec,False)
+    print('Condition satisfied for minimal amplitude at %fmA.'%par[k])
+    if recpar['record']:
+        append_fiber_to_file(rec,par,recpar)
 
 def main():
     '''
@@ -66,9 +69,6 @@ def main():
     
     verbose = False
     verbose_level1 = True
-    plot    = True
-    if plot:
-        import pylab as plt
     counter = 0
     for v in sys.argv:
         counter+=1
@@ -78,8 +78,16 @@ def main():
     par, recpar = readConfigurations(filename)
     createMRGaxon(par,verbose)
     rec = recordMRGaxon(recpar,verbose)
-    stimStep = 1
-    searchForThreshold(par,recpar,rec,k='HFSamp',startpoint=stimStep,resolution=1e-3,verbose=verbose_level1)
+    frequencies = np.array([100,200,500,2000,4000,6000,9000,15000,25000])
+    for freq in frequencies:
+        par['HFSfrequency'] = freq
+        par['HFSamp'] = 0.5
+        par['HFSdur'] = 1000.0/freq
+        print('Processing frequency : %4.1f'%(freq))
+        resetRecorder(rec)
+        stimStep = 1
+        searchForThreshold(par,recpar,rec,k='HFSamp',startpoint=stimStep,
+                           resolution=1e-3,verbose=verbose_level1)
 if __name__=='__main__':
     main()
     
