@@ -100,6 +100,9 @@ def simulatePopulation(par,recpar,rec,XYZ=None, fixed_seed=True,verbose=False, s
                 append_fiber_to_file(rec,par,recpar)
             resetRecorder(rec,False)
     else:
+        if singleRun >= 100:
+            print('Fiber (%d) exceeds limits (100).' % (singleRun))
+            return
         if verbose:
             print('Running fiber ' + str(singleRun)  + ' - ' + str(XYZ[singleRun,:]))
         par['HFSx']=XYZ[singleRun,0]
@@ -108,7 +111,6 @@ def simulatePopulation(par,recpar,rec,XYZ=None, fixed_seed=True,verbose=False, s
         updateMRGaxon(par,False)
         runMRGaxon()
         if recpar['record']:
-            #gname=str(par['HFSfrequency'])+'Hz'
             append_fiber_to_file(rec,par,recpar)
         resetRecorder(rec,False)
 
@@ -118,11 +120,11 @@ def main():
     Or a single particular fiber if a separate parameter is specified.
     The first parameter is always the name of the cfg file.  
     '''
-    if verbose: 
-        print('Running HFS simulation.')
     verbose = False
     verbose_level1 = True
     plot = False
+    if verbose: 
+        print('Running HFS simulation.')
     if plot:
         import pylab as plt
     counter = 0
@@ -130,11 +132,20 @@ def main():
         counter+=1
         if path.basename(__file__) in v:
             break
-    filename = sys.argv[counter]
+    try: 
+        filename = sys.argv[counter]
+    except:
+        print('This function takes the filename of the configuration'
+              ' file as input.')
+        sys.exit(1)
     try:
-        singleRun = sys.argv[counter + 1]
-    except: 
+        singleRun = int(sys.argv[counter + 1])
+    except:
+        print('Running an entire population.') 
         singleRun =  None
+    if not path.exists(filename):
+        print('File (%s) does not exist.' % (filename))
+        sys.exit(1)
     par, recpar = readConfigurations(filename)
     createMRGaxon(par,verbose)
     rec = recordMRGaxon(recpar,verbose)
