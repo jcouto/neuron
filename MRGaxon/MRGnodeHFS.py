@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from neuron import h
 import os.path as path
+import os
+import sys
 import numpy as np
 import h5py as h5
 
@@ -232,6 +234,8 @@ def append_fiber_to_file(rec,par,recpar,group=None,verbose=False):
     '''
     if verbose:
         print('Recording to file '+recpar['filename'])
+    if not path.isdir(path.dirname(recpar['filename'])):
+        os.makedirs(path.dirname(recpar['filename']))
     fid = h5.File(recpar['filename'],'a')
     n_fiber = len(fid.keys())
     if group is None:
@@ -267,6 +271,7 @@ def readConfigurations(filename):
         fid = open(filename)
     else:
         print('File "'+filename+'" does not exist.')
+        sys,exit(1)
         return g_par,g_recpar
     import ConfigParser as cp
     cfg = cp.ConfigParser()

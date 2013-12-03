@@ -78,7 +78,7 @@ def calculateInterNodeLength(fiberD=5.7):
     interlength = (deltax-nodelength-(2*paralength1)-(2*paralength2))/6
     return 2*paralength1+2*paralength2+6*interlength+nodelength
 
-def simulatePopulation(par,recpar,rec,XYZ=None, fixed_seed=True,verbose=False):
+def simulatePopulation(par,recpar,rec,XYZ=None, fixed_seed=True,verbose=False, singleRun = None):
     ''' Runs a simulation on the specified fiber positions XYZ, if None is specified, the default parameters are used (randomized with fixed random seed).
     par,recpar and rec are the simulation parameters, recording parameters and recording vectors respectivelly.
     '''
@@ -86,12 +86,25 @@ def simulatePopulation(par,recpar,rec,XYZ=None, fixed_seed=True,verbose=False):
     if XYZ is None:
         XYZ = randomPositions(scale,N=100,minimum=635,maximum=3000,fixed_seed=fixed_seed)
     fiber=[]
-    for ii in range(0,XYZ.shape[0]):
+    if singleRun is None:
+        for ii in range(0,XYZ.shape[0]):
+            if verbose:
+                print('Running fiber ' + str(ii)  + ' - ' + str(XYZ[ii,:]))
+            par['HFSx']=XYZ[ii,0]
+            par['HFSy']=XYZ[ii,1]
+            par['HFSz']=XYZ[ii,2]
+            updateMRGaxon(par,False)
+            runMRGaxon()
+            if recpar['record']:
+                #gname=str(par['HFSfrequency'])+'Hz'
+                append_fiber_to_file(rec,par,recpar)
+            resetRecorder(rec,False)
+    else:
         if verbose:
-            print('Running fiber '+str(XYZ[ii,:]))
-        par['HFSx']=XYZ[ii,0]
-        par['HFSy']=XYZ[ii,1]
-        par['HFSz']=XYZ[ii,2]
+            print('Running fiber ' + str(singleRun)  + ' - ' + str(XYZ[singleRun,:]))
+        par['HFSx']=XYZ[singleRun,0]
+        par['HFSy']=XYZ[singleRun,1]
+        par['HFSz']=XYZ[singleRun,2]
         updateMRGaxon(par,False)
         runMRGaxon()
         if recpar['record']:
@@ -102,11 +115,14 @@ def simulatePopulation(par,recpar,rec,XYZ=None, fixed_seed=True,verbose=False):
 def main():
     '''
     Runs 100 fibers in series at a specified condition.
+    Or a single particular fiber if a separate parameter is specified.
+    The first parameter is always the name of the cfg file.  
     '''
-    print('Running HFS simulation.')
+    if verbose: 
+        print('Running HFS simulation.')
     verbose = False
     verbose_level1 = True
-    plot = True
+    plot = False
     if plot:
         import pylab as plt
     counter = 0
@@ -115,10 +131,14 @@ def main():
         if path.basename(__file__) in v:
             break
     filename = sys.argv[counter]
+    try:
+        singleRun = sys.argv[counter + 1]
+    except: 
+        singleRun =  None
     par, recpar = readConfigurations(filename)
     createMRGaxon(par,verbose)
     rec = recordMRGaxon(recpar,verbose)
-    simulatePopulation(par,recpar,rec,None,True,True)
+    simulatePopulation(par,recpar,rec,None,True,True, singleRun)
     h.quit()
 
 if __name__=='__main__':
