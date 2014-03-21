@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+AMP=0.01
+SIZE=20
+
+FREQUENCIES="20 30 40 50 60 70 80 90 100 110 120 130 140"
+FOLDER='.'
+if [ $1 ]; then
+	FOLDER=$1
+	echo "Saving to folder "$FOLDER
+	if [ ! -d "$FOLDER" ]; then
+		mkdir $FOLDER
+	fi
+fi
+
+for F in `echo $FREQUENCIES`
+do
+	echo "Running phase response curve for "$F"Hz."
+	./prc.py -s $SIZE -a $AMP -f $F -g $FOLDER"/prc_"$F"Hz.h5"
+done

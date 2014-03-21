@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import os.path as path
 import numpy as np
 import h5py as h5
@@ -36,24 +37,34 @@ class MRGfile():
         '''
         if verbose:
             print('Reading data from file ' + filename+'.')
-        self._file_ref.append(h5.File(filename))
-        self.counter+=1
-        for v,k in self._file_ref[-1].iteritems():
-            self.HFSfrequency.append(k.attrs['HFSfrequency'])
-            self.HFSamp.append(k.attrs['HFSamp'])
-            self.HFSwaveform.append(k.attrs['HFSwaveform'])
-            self.HFSx.append(k.attrs['HFSx'])
-            self.HFSy.append(k.attrs['HFSy'])
-            self.HFSz.append(k.attrs['HFSz'])
-            self.fiberD.append(k.attrs['fiberD'])
-            self.axonnodes.append(k.attrs['axonnodes'])
-            self.names.append(k)
-            self.file.append(self.counter)
-            output_name = 'spk'+str(np.max(k.attrs['nodes']))
-            if len(k['spiketimes/'+output_name]):
-                self.output.append(np.array(k['spiketimes'+'/'+output_name].value))
+        if path.isfile(filename):
+            try: 
+                self._file_ref.append(h5.File(filename, 'r'))
+            except IOError:
+                    if not os.access(filename, os.R_OK):
+                        print('File %s not readable'%(filename))
+                    else: 
+                        print('Could not append file (IOError): %s '%(filename))
             else:
-                self.output.append(np.array([]))
+                self.counter+=1
+                for v,k in self._file_ref[-1].iteritems():
+                    self.HFSfrequency.append(k.attrs['HFSfrequency'])
+                    self.HFSamp.append(k.attrs['HFSamp'])
+                    self.HFSwaveform.append(k.attrs['HFSwaveform'])
+                    self.HFSx.append(k.attrs['HFSx'])
+                    self.HFSy.append(k.attrs['HFSy'])
+                    self.HFSz.append(k.attrs['HFSz'])
+                    self.fiberD.append(k.attrs['fiberD'])
+                    self.axonnodes.append(k.attrs['axonnodes'])
+                    self.names.append(k)
+                    self.file.append(self.counter)
+                    output_name = 'spk'+str(np.max(k.attrs['nodes']))
+                    if len(k['spiketimes/'+output_name]):
+                        self.output.append(np.array(k['spiketimes'+'/'+output_name].value))
+                    else:
+                        self.output.append(np.array([]))
+        else:
+            print('File %s not found.'%(filename)) 
     
     def spiketrains(self,index=None):
         '''Returns the output spiketimes for the specified indexes
