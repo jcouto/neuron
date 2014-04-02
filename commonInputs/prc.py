@@ -47,7 +47,7 @@ def makeOutputFilename(prefix='', extension='.out'):
     return filename + suffix + extension
 
 def main():
-    available_models = ['kr','dsb94']
+    available_models = ['kr','dsb94', 'kr_cn']
     try:
         opts,args = getopt.getopt(sys.argv[1:],'hpi:m:g:f:d:s:a:w:n:',['help'])
     except getopt.GetoptError, err:
@@ -109,6 +109,18 @@ def main():
                    for gid in range(N)]
         for n in neurons:
             n.soma.gkbar_hpkj = n.soma.gkbar_hpkj * 1.40
+    elif model == 'kr_cn':
+        neurons = [KhaliqRaman(gid,
+                               {'diameter':cell_size,'length':cell_size,'nSynapses':0, 'channelNoise': True},
+                               prcProps={'frequency':frequency,
+                                         'gp':0.01, 'gi':0.1,
+                                         'pulseAmp':pulse_amp,
+                                         'pulseWidth':pulse_width,
+                                         'spkCount':spk_count,
+                                         'delay':1000}) 
+                   for gid in range(N)]
+        #for n in neurons:
+        #    n.soma.gkbar_hpkj = n.soma.gkbar_hpkj * 1.40
     elif model == 'dsb94':
         #fixedInput = {'probability': 0.5, 'spikeTimes': np.cumsum(np.random.poisson(30,140))}
         #for n in neurons:

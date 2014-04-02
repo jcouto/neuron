@@ -304,6 +304,7 @@ class KhaliqRaman(Neuron):
         length = tbl.Float64Col()
         diameter = tbl.Float64Col()
         nSynapses = tbl.Int32Col()
+        channelNoise =  tbl.bool()
 
     class SynapseProperties (tbl.IsDescription):
         name = tbl.StringCol(32)
@@ -320,7 +321,7 @@ class KhaliqRaman(Neuron):
         spkCount = tbl.Float64Col()
         delay = tbl.Float64Col()
 
-    def __init__(self, ID, neuronProps={'length': 20, 'diameter': 20, 'nSynapses': 100},
+    def __init__(self, ID, neuronProps={'length': 20, 'diameter': 20, 'nSynapses': 100,  'channelNoise' = False},
                  synapseProps={'name': 'ampa', 'Erev': 0.},
                  prcProps={'frequency':None, 'gp':0.01, 'gi':0.1, 'pulseAmp':0.05,'pulseWidth':1,'spkCount':6},
                  verbose=False):
@@ -337,7 +338,6 @@ class KhaliqRaman(Neuron):
         self._neuronProps = neuronProps
         self._neuronProps['name'] = 'KhaliqRaman'
         self._neuronProps['description'] = 'Khaliq-Raman Purkinje neuron model'
-        
         self._synapseProps = synapseProps
         if self._synapseProps['name'].lower() == 'ampa':
             self._synapseProps['description'] = 'AMPA synapse'
@@ -373,15 +373,27 @@ class KhaliqRaman(Neuron):
         if self.verbose:
             print('>>> Building a Khaliq-Raman neuron model.')
         self._soma = h.Section()
-        self._soma.insert('naRsg')
-        self._soma.insert('kpkj')
-        self._soma.insert('kpkj2')
-        self._soma.insert('kpkjslow')
-        self._soma.insert('bkpkj')
-        self._soma.insert('cadiff')
-        self._soma.insert('cap')
-        self._soma.insert('lkpkj')
-        self._soma.insert('hpkj')
+        if self._neuroProps['channelNoise']: 
+            self._soma.insert('naRsg_cn')
+            self._soma.insert('kpkj_cn')
+            self._soma.insert('kpkj2_cn')
+            self._soma.insert('kpkjslow_cn')
+            self._soma.insert('bkpkj_cn')
+            self._soma.insert('cadiff_cn')
+            self._soma.insert('cap_cn')
+            self._soma.insert('lkpkj_cn')
+            self._soma.insert('hpkj_cn')
+        else:
+            self._soma.insert('naRsg')
+            self._soma.insert('kpkj')
+            self._soma.insert('kpkj2')
+            self._soma.insert('kpkjslow')
+            self._soma.insert('bkpkj')
+            self._soma.insert('cadiff')
+            self._soma.insert('cap')
+            self._soma.insert('lkpkj')
+            self._soma.insert('hpkj')
+
         self._soma.L = self.length
         self._soma.diam = self.diameter
         self._soma.ena = 60
