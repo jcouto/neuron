@@ -18,8 +18,10 @@ g_par = {
     'dt': 0.002,
     'tstop': 50,
     'channelDescription': 0,
+    'numberOfStoChannels':200, 
     'axonnodes': 51,
     'fiberD': 10,
+    'n_na': 200,
     'HFSreferenceNode': 25,
     'HFSdur': 50.0,
     'HFSfrequency': 200,
@@ -39,6 +41,7 @@ g_par = {
     }
 g_recpar = {
     'record': True,
+    'plot':  False, 
     'nodes':np.array(range(0,g_par['axonnodes'])),
     'filename': 'data/simulation.h5',
     'recordVoltage':True,
@@ -181,16 +184,20 @@ def plotMRGaxon(plt, rec, recpar,color=[0,0,0]):
     Plots the voltage traces and a rastergram of the
     spikes counting ordered by node.
     '''
-    from spk_utils import plotRastergram
+    from plot_utils import plotRastergram
     fig = plt.figure(figsize=(10,5))
     ax = []
     ax.append(fig.add_axes([0.1,0.1,0.8,0.2]))
     spiketimes = []
     n_sptrain = len(spiketimes)
+    counter =  0
     for offset,ii in enumerate(recpar['nodes']):
         spiketimes.append(rec['spiketimes']['spk'+str(ii)].to_python())
-    plotRastergram(ax[-1], spiketimes, 0, color)
-    ax.append(fig.add_axes([0.1,0.4,0.8,0.6]))
+        counter += len(spiketimes[-1])
+    if counter:
+        plt.axes(ax[-1])
+        plotRastergram(spiketimes, 0, None, color)
+        ax.append(fig.add_axes([0.1,0.4,0.8,0.6]))
     voltages = rec['voltage']
     time = voltages['t']
     n_voltage = len(voltages) - 1
@@ -234,9 +241,10 @@ def append_fiber_to_file(rec,par,recpar,group=None,verbose=False):
     '''
     if verbose:
         print('Recording to file '+recpar['filename'])
-    if not path.isdir(path.dirname(recpar['filename'])):
-        os.makedirs(path.dirname(recpar['filename']))
-    fid = h5.File(recpar['filename'],'a')
+    foldername =  path.dirname(os.path.realpath(recpar['filename']))
+    if not path.isdir(foldername): 
+        os.makedirs(foldername)
+    fid = h5.File(os.path.realpath(recpar['filename']),'a')
     n_fiber = len(fid.keys())
     if group is None:
         gid = fid.create_group('fiber'+str(n_fiber))
@@ -287,7 +295,6 @@ def main():
     configuration file.
     '''
     verbose = True
-    plot = True
     counter = 0
     for v in sys.argv:
         counter+=1
@@ -300,7 +307,7 @@ def main():
     runMRGaxon()
     if recpar['record']:
         append_fiber_to_file(rec,par,recpar)
-    if plot:
+    if recpar['plot']:
         import pylab as plt
         fig = plotMRGaxon(plt, rec, recpar)
         plt.show()

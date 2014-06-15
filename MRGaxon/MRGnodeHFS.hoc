@@ -40,6 +40,7 @@ proc standalone_run() {
     channelDescription = 0
     axonnodes = 50
     fiberD = 10
+    n_na = 200		// number of channels for the stochastic models...
     //SIMULATION PARAMETERS
     dt = 0.002
     tstop = 50
@@ -93,7 +94,6 @@ proc model_globals() {
     rhoa = 0.7e6	//Ohm-um//
     mycm = 0.1		//uF/cm2/lamella membrane//
     mygm = 0.001	//S/cm2/lamella membrane//
-    n_na = 200		// number of channels for the stochastic models...
     n_k	= int(n_na*3600/12000)
     rhoe = 5e6		//Ohm-um//resistivity of extracellular medium
     
@@ -131,34 +131,48 @@ access node[0]
 objref s[total]
 create electrode
 
+if(channelDescription==0){
+	print "Using the original model."
+}
+// In case these are needed...
+load_file("sto_chan_37.ses")
+objectvar na_chan[axonnodes],k_chan[axonnodes]
+if(channelDescription==2){
+	print "Using the stochastic model from the session file."
+}
+
 proc initMRG() {
     print "Initializing MRGaxon."
     for i=0,axonnodes-1 {
-	node[i]{
-	    s[i] = new SectionRef()					
-	    nseg = 1
-	    diam = nodeD
-	    L = nodelength
-	    Ra = rhoa/10000
-	    cm = 2
-            if(channelDescription==0){
-		//print "Using original model."
-                insert axnode
-            }
-            if(channelDescription==1){
-		print "Using model from the session file."
-		//insert axnode_no_na_k
-		//insert det_na
-		//insert det_k
-		ena = 50
-		ek = -90
-            }
-            if(channelDescription==2){
-		print "Using stochastic model from the session file."
-                //insert axnode_no_na_k
-            }
-	    insert extracellular xraxial=Rpn0 xg=1e10 xc=0
-	}
+		node[i]{
+		    s[i] = new SectionRef()					
+		    nseg = 1
+		    diam = nodeD
+		    L = nodelength
+		    Ra = rhoa/10000
+		    cm = 2
+		        if(channelDescription==0) {
+		            insert axnode
+		        }
+		        if(channelDescription==1){
+				print "Using model from the session file."
+				//insert axnode_no_na_k
+				//insert det_na
+				//insert det_k
+		        }
+		        if(channelDescription==2) {
+		            insert axnode_no_na_k
+					na_chan[i] = new sto_na(0.5)
+					na_chan[i].Nsingle = n_na
+					na_chan[i].gmax = (3*1e-8*PI*L*diam/n_na)*1e6
+					k_chan[i] = new sto_k(0.5)
+					k_chan[i].Nsingle = n_k	
+					k_chan[i].gmax = (0.08*1e-8*PI*L*diam/n_k)*1e6
+					ena = 50
+					ek = -90
+		        }
+		    insert extracellular xraxial=Rpn0 xg=1e10 xc=0
+		}
     }
     for i=0, paranodes1-1 {
 	MYSA[i]{
