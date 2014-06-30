@@ -24,6 +24,7 @@ class MRGfile():
         self.HFSx = []
         self.HFSy = []
         self.HFSz = []
+        self.nChannels = []
         self.fiberD = []
         self.axonnodes = []
         self.recordedNodes = []
@@ -54,8 +55,13 @@ class MRGfile():
                     self.HFSx.append(k.attrs['HFSx'])
                     self.HFSy.append(k.attrs['HFSy'])
                     self.HFSz.append(k.attrs['HFSz'])
+                    try: 
+                        self.nChannels.append(k.attrs['n_na'])
+                    except: # This was not always like this...  
+                        self.nChannels.append(1.0)
                     self.fiberD.append(k.attrs['fiberD'])
                     self.axonnodes.append(k.attrs['axonnodes'])
+                    self.recordedNodes.append(k.attrs['nodes'])
                     self.names.append(k)
                     self.file.append(self.counter)
                     output_name = 'spk'+str(np.max(k.attrs['nodes']))
