@@ -4,6 +4,7 @@ from neuron import h
 import numpy as np
 import h5utils as h5
 import tables as tbl
+import ipdb
 
 class Neuron:
     """
@@ -36,6 +37,7 @@ class Neuron:
         self._prc_netcon = None
         self._prc_sobol = None
         self._prc_sobol_times=None
+        self._IClampNoise=None
         self._build()
         self._addSynapses()
         self._addSpikeCounter()
@@ -169,6 +171,12 @@ class Neuron:
         """
         for idx in synapseIndexes:
             self._connectSingleStimulus(stimulus, idx, connectionProps)
+    
+    def addGaussianCurrent(self, amplitude=0, delay=0, duration=0):
+        self._IClampNoise = h.IClampNoise(self.soma(0.5))
+        self._IClampNoise.amp = amplitude
+        self._IClampNoise.delay = delay
+        self._IClampNoise.dur = duration
 
     def addFixedInput(self, probability, spikeTimes, connectionProps={'weight': 0.0001, 'delay': 1.}):
         """
@@ -304,7 +312,7 @@ class KhaliqRaman(Neuron):
         length = tbl.Float64Col()
         diameter = tbl.Float64Col()
         nSynapses = tbl.Int32Col()
-        channelNoise =  tbl.bool()
+        channelNoise =  tbl.BoolCol()
 
     class SynapseProperties (tbl.IsDescription):
         name = tbl.StringCol(32)
@@ -321,7 +329,7 @@ class KhaliqRaman(Neuron):
         spkCount = tbl.Float64Col()
         delay = tbl.Float64Col()
 
-    def __init__(self, ID, neuronProps={'length': 20, 'diameter': 20, 'nSynapses': 100,  'channelNoise' = False},
+    def __init__(self, ID, neuronProps={'length': 20, 'diameter': 20, 'nSynapses': 100,  'channelNoise': False},
                  synapseProps={'name': 'ampa', 'Erev': 0.},
                  prcProps={'frequency':None, 'gp':0.01, 'gi':0.1, 'pulseAmp':0.05,'pulseWidth':1,'spkCount':6},
                  verbose=False):
@@ -373,15 +381,16 @@ class KhaliqRaman(Neuron):
         if self.verbose:
             print('>>> Building a Khaliq-Raman neuron model.')
         self._soma = h.Section()
-        if self._neuroProps['channelNoise']: 
+        print self._neuronProps
+        if self._neuronProps['channelNoise']: 
             self._soma.insert('naRsg_cn')
             self._soma.insert('kpkj_cn')
             self._soma.insert('kpkj2_cn')
             self._soma.insert('kpkjslow_cn')
             self._soma.insert('bkpkj_cn')
-            self._soma.insert('cadiff_cn')
-            self._soma.insert('cap_cn')
-            self._soma.insert('lkpkj_cn')
+            self._soma.insert('cadiff')
+            self._soma.insert('cap')
+            self._soma.insert('lkpkj')
             self._soma.insert('hpkj_cn')
         else:
             self._soma.insert('naRsg')
@@ -451,11 +460,10 @@ class KhaliqRaman(Neuron):
 def saveNeuron(filename, neuron, saveVoltage=False, simulationName = 'Common input simulation'):
     fid = h5.H5File(filename, 'a', simulationName)
     groupName = '/Neurons/ID_' + str(neuron.ID)
-    fid.createGroup('/','Neurons')
-    fid.createGroup('/Neurons','ID_' + str(neuron.ID))
+    fid.createGroup('/','Neurons','Neurons')
+    fid.createGroup('/Neurons','ID_%s'%(str(neuron.ID)))
     fid.writeTable(groupName, 'Cell', neuron.neuronPropertiesClass, 'Neuron properties', neuron.neuronProperties)
     fid.writeTable(groupName, 'Synapses', neuron.synapsePropertiesClass, 'Synapses properties', neuron.synapseProperties)
-
     try:
         fid.writeTable(groupName,'PRC',neuron.phaseResponseCurvePropertiesClass,
                        'Phase Response Curve Properties',neuron.phaseResponseCurveProperties)

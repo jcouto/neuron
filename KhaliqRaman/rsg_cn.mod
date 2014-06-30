@@ -1,3 +1,4 @@
+
 TITLE Rsg sodium channel with channel noise
 : Resurgent sodium channel (with blocking particle)
 : with updated kinetic parameters from Raman and Bean  

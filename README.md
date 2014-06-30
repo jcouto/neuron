@@ -23,3 +23,13 @@ These repository contains NEURON models. Most have been adapted from modelDB (se
 		- detailed multicompartimental model of a Purkinje cell.
 		- De Schutter and Bower (1994) model
 
+
+To run the channel noise models you might need to compile neuron with support for libgsl, to do that use the following flags:
+	export LIBS='-lgsl -lgslcblas'
+	export LDFLAGS=-L/usr/local/lib
+
+And compile neuron from source in the usual way.
+
+
+
+

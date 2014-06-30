@@ -42,11 +42,11 @@ double cn_noise_mslo_cn[N_OPEN_STATES][N_STATES-1];
 #define cn_Z cn_Z_mslo_cn
 double cn_Z_mslo_cn;
 
-void init_cn(void);
-void fill_A(void);
-void compute_noise(double v, double ca, int num_channels);
-int compute_sigmas(int num_channels);
-int compute_taus();
+void mslo_init_cn(void);
+void mslo_fill_A(void);
+void mslo_compute_noise(double v, double ca, int num_channels);
+int mslo_compute_sigmas(int num_channels);
+int mslo_compute_taus();
 
 ENDVERBATIM
 
@@ -98,7 +98,7 @@ PARAMETER {
     pb3 = 486e-3  (/ms)
     pb4 = 92e-3  (/ms)
     
-    gamma_k = 10  (pS)
+    gamma_k = 266 (pS) :Womack and Khodakhah, Charanterization of large conductance Ca2+ activated K+ channel... Eur J Neuro 2002  
     seed = 5061983 (1)
 }
 
@@ -158,7 +158,7 @@ STATE {
 BREAKPOINT {
     SOLVE activation METHOD sparse
     VERBATIM
-    compute_noise(v,wca*cai,Nk);
+    mslo_compute_noise(v,wca*cai,Nk);
     g = gbar * (O0+O1+O2+O3+O4 + cn_Z);
     if (g < 0.) {
 	g = 0.;
@@ -177,7 +177,7 @@ INITIAL {
     printf("Area = %f.\n", area)
     set_seed(seed)
     VERBATIM
-    init_cn();
+    mslo_init_cn();
     ENDVERBATIM
 
 }
@@ -242,7 +242,7 @@ PROCEDURE rates(v(mV), ca (mM)) {
 
 VERBATIM
 
-void init_cn(void) {
+void mslo_init_cn(void) {
     int i, j;
     cn_Z = 0.0;
     for (i=0; i<N_OPEN_STATES; i++) {
@@ -252,7 +252,7 @@ void init_cn(void) {
     }
 }
 
-void fill_A(void) {
+void mslo_fill_A(void) {
     int i, j;
     
     cn_A[ 0] = -(c01 + f0);
@@ -357,7 +357,7 @@ void fill_A(void) {
     cn_A[99] = -(o43+b4);
 }
 	
-int compute_sigmas(int num_channels) {
+int mslo_compute_sigmas(int num_channels) {
     int i, j, k, flag, s;
     double pinf, coeff = 1.0 / num_channels;
     double c[N_STATES];
@@ -408,7 +408,7 @@ sigmas_end:
     return flag;
 }
 
-int compute_taus() {
+int mslo_compute_taus() {
     int i, j, flag;
     double lambda;
     double eigs[N_STATES*2]; /* in general, eigenvalues of a non-symmetric matrix are complex */
@@ -444,18 +444,18 @@ taus_end:
     return flag;
 }
 
-void compute_noise(double v, double ca, int num_channels) {
+void mslo_compute_noise(double v, double ca, int num_channels) {
     int i, j;
     
-    fill_A();
+    mslo_fill_A();
     
-    if (compute_taus() != 0) {
-	printf("compute_taus returned an error flag @ t = %g: V = %g.\n", t, v);
+    if (mslo_compute_taus() != 0) {
+	printf("mslo_compute_taus returned an error flag @ t = %g: V = %g.\n", t, v);
 	exit(1);
     }
     
-    if (compute_sigmas(num_channels) != 0) {
-	printf("compute_sigmas returned an error flag @ t = %g: V = %g.\n", t, v);
+    if (mslo_compute_sigmas(num_channels) != 0) {
+	printf("mslo_compute_sigmas returned an error flag @ t = %g: V = %g.\n", t, v);
 	exit(1);
     }
     

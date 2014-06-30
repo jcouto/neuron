@@ -57,7 +57,7 @@ PARAMETER {
     
     : channel noise - start
     seed = 5061983 (1)
-    gamma_k = 10 (pS)
+    gamma_k = 266  (pS):Womack and Khodakhah, Charanterization of large conductance Ca2+ activated K+ channel... Eur J Neuro 2002  
     : channel noise - end
 }
 
