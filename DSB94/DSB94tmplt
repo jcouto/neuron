@@ -30,7 +30,6 @@ public all
 
 objref synlist
 objref all
-model = 10
 
 public soma_group
 objref soma_group
@@ -259,11 +258,11 @@ proc init() {
     //geom_nseg()
     synlist = new List()
     x = y = z = 0
-    reference = $s1
-    type = $s2
-    description = $s3
-    
-    sprint(name, "%s", type)
+    //    reference = $1
+    //model = $2
+    //description = $3
+    model = 10    
+    sprint(name, "PM%d", model)
 }
 
 create soma
