@@ -4,8 +4,23 @@ import os.path as path
 import numpy as np
 import h5py as h5
 import pylab as plt
+import spk_utils as su
 
-__all__ = ['MRGfile','zero_len','nonzero_len','fix_axes']
+__all__ = ['MRGfile','zero_len','nonzero_len','fix_axes', 'compute_H']
+
+def compute_H(data, idx):
+    MIN =  0.
+    MAX =  1000.
+    BLOCK_TIME =  100.
+    H =  np.array([su.entropy(sp[(sp >= MIN) & (sp <= MAX)], order = 2)
+                   for sp in data.spiketrains(idx)])
+    # Check if the fibers are blocked... (no AP after BLOCK_TIME)
+    blk =  np.where(np.array([len(sp[sp > BLOCK_TIME])
+                                for sp in data.spiketrains(idx)]) < 1)[0]
+    H[blk] = np.nan
+    return abs(H)
+
+
 
 class MRGfile():
     def __init__(self, filename=None,verbose=False):
